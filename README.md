@@ -7,6 +7,17 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# ZendPC - Configurador de PCs Gaming
+
+ZendPC es una plataforma diseñada para la gestión y personalización de ordenadores gaming. Actualmente, el proyecto cuenta con:
+
+- **Panel de Administración:** Gestión completa de categorías y productos con una estética *glassmorphic* moderna.
+- **Catálogo de Productos:** Visualización de componentes con diseño oscuro y premium.
+- **Configurador (Builder):** Módulo en desarrollo para la selección de componentes.
+- **Stack Tecnológico:** Construido con **Laravel 11**, **Inertia.js**, **React** y **Tailwind CSS**.
+
+---
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
