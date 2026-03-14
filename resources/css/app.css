@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-slate-200 font-sans antialiased overflow-x-hidden;
+  }
+}
+
+@layer components {
+    .glass-panel {
+        @apply bg-dark-card/90 backdrop-blur-xl border border-dark-border shadow-2xl;
+    }
+    
+    .glass-nav {
+        @apply bg-dark-bg/80 backdrop-blur-lg border-b border-dark-border sticky top-0 z-50;
+    }
+
+    .btn-primary {
+        @apply bg-gradient-to-r from-zend-600 to-zend-500 hover:from-zend-500 hover:to-zend-400 text-white font-semibold py-2 px-6 rounded-lg shadow-lg shadow-zend-500/20 transition-all duration-300 transform hover:-translate-y-0.5;
+    }
+
+    .btn-secondary {
+        @apply bg-dark-card hover:bg-dark-border text-slate-200 font-semibold py-2 px-6 rounded-lg border border-dark-border transition-all duration-300 transform hover:-translate-y-0.5 shadow-md;
+    }
+    
+    .btn-danger {
+        @apply bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-semibold py-2 px-6 rounded-lg shadow-lg shadow-red-500/20 transition-all duration-300 transform hover:-translate-y-0.5;
+    }
+    
+    .btn-success {
+        @apply bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-semibold py-2 px-6 rounded-lg shadow-lg shadow-emerald-500/20 transition-all duration-300 transform hover:-translate-y-0.5;
+    }
+
+    .card-hover {
+        @apply transition-all duration-300 hover:shadow-2xl hover:shadow-zend-500/10 hover:-translate-y-1 hover:border-zend-500/50 cursor-pointer;
+    }
+
+    .input-field {
+        @apply bg-dark-bg border border-dark-border text-slate-200 text-sm rounded-lg focus:ring-zend-500 focus:border-zend-500 block w-full p-2.5 transition-colors duration-200;
+    }
+    
+    .styled-scrollbar::-webkit-scrollbar {
+        width: 8px;
+    }
+    .styled-scrollbar::-webkit-scrollbar-track {
+        background: #0f111a;
+    }
+    .styled-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #23273e;
+        border-radius: 10px;
+    }
+    .styled-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: #3730a3;
+    }
+}
