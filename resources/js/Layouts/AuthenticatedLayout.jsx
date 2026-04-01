@@ -1,8 +1,8 @@
+import React, { useState } from 'react';
 import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function AuthenticatedLayout({ header, children }) {
@@ -10,129 +10,81 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-dark-bg text-slate-200 font-sans selection:bg-zend-500/30">
-            {/* Background Decorations */}
-            <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-50">
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-zend-600/10 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[120px]"></div>
-            </div>
+        <div className="min-h-screen bg-[#080a11] text-slate-200 font-sans selection:bg-indigo-500/30 flex flex-col relative overflow-hidden">
+            {/* Global Aura */}
+            <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
 
-            <nav className="glass-nav border-b border-dark-border sticky top-0 z-[60]">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-20 justify-between items-center">
+            <nav className="glass-nav border-b-white/5 border-b-[0.5px] sticky top-0 z-[60]">
+                <div className="max-w-[1700px] mx-auto px-6">
+                    <div className="flex justify-between h-20">
                         <div className="flex items-center">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/" className="flex items-center gap-2 group">
-                                    <img src="/logo.png" alt="ZendPC" className="w-10 h-10 object-contain drop-shadow-lg group-hover:scale-110 transition-transform" />
-                                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-zend-400 to-zend-200 tracking-tight hidden sm:block">ZendPC</h1>
-                                </Link>
-                            </div>
+                            <Link href="/" className="flex items-center gap-4 group">
+                                <ApplicationLogo className="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+                            </Link>
 
-                            <div className="hidden space-x-6 sm:ms-12 sm:flex">
-                                <Link
-                                    href={route('catalog.index')}
-                                    className="text-slate-400 hover:text-white px-1 py-2 text-sm font-medium transition-colors"
-                                >
+                            <div className="hidden lg:flex ml-20 items-center gap-12">
+                                <Link href={route('catalog.index')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${route().current('catalog.index') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-white'}`}>
                                     Catálogo
                                 </Link>
-                                <Link
-                                    href={route('builder.index')}
-                                    className="text-slate-400 hover:text-white px-1 py-2 text-sm font-medium transition-colors"
-                                >
+                                <Link href={route('builder.index')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${route().current('builder.index') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-white'}`}>
                                     Configurador
                                 </Link>
-                                <Link
-                                    href={route('dashboard')}
-                                    className={`px-1 py-2 text-sm font-medium transition-all ${route().current('dashboard') ? 'text-zend-400 border-b-2 border-zend-500' : 'text-slate-400 hover:text-white'}`}
-                                >
+                                <Link href={route('dashboard')} className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${route().current('dashboard') ? 'text-white border-b-2 border-indigo-500 pb-1' : 'text-slate-400 hover:text-white'}`}>
                                     Mi Taller
                                 </Link>
                             </div>
                         </div>
 
-                        <div className="hidden sm:flex sm:items-center sm:ms-6">
-                            <div className="relative ms-3">
+                        <div className="hidden sm:flex sm:items-center gap-6">
+                            {user ? (
                                 <Dropdown>
                                     <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-xl bg-dark-card border border-dark-border px-4 py-2.5 text-sm font-semibold text-slate-200 transition-all hover:bg-dark-border hover:border-zend-500/50 shadow-lg"
-                                            >
-                                                <div className="w-6 h-6 rounded-full bg-zend-600 flex items-center justify-center text-[10px] text-white mr-2 shadow-inner">
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4 text-slate-500"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
+                                        <button className="flex items-center gap-4 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all group focus:outline-none">
+                                            <div className="text-right hidden sm:block">
+                                                <div className="text-[11px] font-black text-white uppercase tracking-tight leading-none mb-1">{user.name}</div>
+                                                <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Panel Usuario</div>
+                                            </div>
+                                            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/10 shadow-inner">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        </button>
                                     </Dropdown.Trigger>
-
-                                    <Dropdown.Content contentClasses="py-1 bg-dark-card border border-dark-border rounded-xl shadow-2xl overflow-hidden mt-2">
+                                    <Dropdown.Content contentClasses="py-1 bg-[#0f121d] border border-white/5 rounded-xl shadow-2xl mt-2 w-56">
                                         {user.role === 'admin' && (
                                             <>
-                                                <Dropdown.Link
-                                                    href={route('admin.categories.index')}
-                                                    className="text-slate-300 hover:bg-zend-600/20 hover:text-zend-400 font-medium px-4 py-3"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
-                                                        Admin Categorías
-                                                    </div>
+                                                <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                    Admin Categorías
                                                 </Dropdown.Link>
-                                                <Dropdown.Link
-                                                    href={route('admin.products.index')}
-                                                    className="text-slate-300 hover:bg-zend-600/20 hover:text-zend-400 font-medium px-4 py-3"
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-                                                        Admin Productos
-                                                    </div>
+                                                <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                    Admin Productos
                                                 </Dropdown.Link>
-                                                <div className="border-t border-dark-border my-1"></div>
+                                                <div className="border-t border-white/5 my-1"></div>
                                             </>
                                         )}
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                            className="text-slate-300 hover:bg-zend-600/20 hover:text-zend-400 font-medium px-4 py-3"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                                                Perfil de Usuario
-                                            </div>
+                                        <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                            Perfil de Usuario
                                         </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                            className="text-red-400 hover:bg-red-500/10 font-medium px-4 py-3 w-full text-left"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                                                Cerrar Sesión
-                                            </div>
+                                        <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 text-sm font-medium w-full text-left">
+                                            Cerrar Sesión
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
-                            </div>
+                            ) : (
+                                <div className="flex items-center gap-4">
+                                    <Link href={route('login')} className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">
+                                        Iniciar Sesión
+                                    </Link>
+                                    <Link href={route('register')} className="px-6 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white border border-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-[10px] font-black uppercase tracking-widest transition-all">
+                                        Registrarse
+                                    </Link>
+                                </div>
+                            )}
                         </div>
 
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
                                 onClick={() => setShowingNavigationDropdown((p) => !p)}
-                                className="inline-flex items-center justify-center rounded-xl p-2.5 text-slate-400 bg-dark-card border border-dark-border transition-colors hover:text-white focus:outline-none"
+                                className="inline-flex items-center justify-center rounded-xl p-2.5 text-slate-400 bg-white/[0.03] border border-white/5 transition-colors hover:text-white focus:outline-none"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -144,53 +96,58 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 {/* Mobile menu */}
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden bg-dark-card border-b border-dark-border'}>
+                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden bg-[#0f121d] border-b border-white/5'}>
                     <div className="space-y-1 pb-3 pt-2 px-4 text-center">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Mi Taller
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('catalog.index')}>Catálogo</ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('builder.index')}>Configurador</ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>Mi Taller</ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('catalog.index')} active={route().current('catalog.index')}>Catálogo</ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('builder.index')} active={route().current('builder.index')}>Configurador</ResponsiveNavLink>
                     </div>
 
-                    <div className="border-t border-dark-border pb-1 pt-4 px-4 bg-dark-bg/50">
-                        <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-full bg-zend-600 flex items-center justify-center font-bold text-white shadow-lg mr-3">
-                                {user.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <div className="text-base font-bold text-white uppercase">{user.name}</div>
-                                <div className="text-xs text-slate-500">{user.email}</div>
-                            </div>
-                        </div>
+                    <div className="border-t border-white/5 pb-1 pt-4 px-4 bg-white/[0.02]">
+                        {user ? (
+                            <>
+                                <div className="flex items-center justify-center mb-4">
+                                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/10 flex items-center justify-center font-bold shadow-lg mr-3">
+                                        {user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="text-base font-bold text-white uppercase">{user.name}</div>
+                                        <div className="text-xs text-slate-500">{user.email}</div>
+                                    </div>
+                                </div>
 
-                        <div className="mt-4 space-y-1 pb-4">
-                            {user.role === 'admin' && (
-                                <>
-                                    <ResponsiveNavLink href={route('admin.categories.index')}>Admin Categorías</ResponsiveNavLink>
-                                    <ResponsiveNavLink href={route('admin.products.index')}>Admin Productos</ResponsiveNavLink>
-                                </>
-                            )}
-                            <ResponsiveNavLink href={route('profile.edit')}>Perfil</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                                Cerrar Sesión
-                            </ResponsiveNavLink>
-                        </div>
+                                <div className="mt-4 space-y-1 pb-4">
+                                    {user.role === 'admin' && (
+                                        <>
+                                            <ResponsiveNavLink href={route('admin.categories.index')}>Admin Categorías</ResponsiveNavLink>
+                                            <ResponsiveNavLink href={route('admin.products.index')}>Admin Productos</ResponsiveNavLink>
+                                        </>
+                                    )}
+                                    <ResponsiveNavLink href={route('profile.edit')}>Perfil</ResponsiveNavLink>
+                                    <ResponsiveNavLink method="post" href={route('logout')} as="button">Cerrar Sesión</ResponsiveNavLink>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex flex-col gap-4 py-4">
+                                <ResponsiveNavLink href={route('login')}>Iniciar Sesión</ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('register')}>Registrarse</ResponsiveNavLink>
+                            </div>
+                        )}
                     </div>
                 </div>
             </nav>
 
-            <div className="relative z-10">
+            <div className="relative z-10 flex-1 flex flex-col">
                 {header && (
-                    <header className="border-b border-dark-border py-12 relative overflow-hidden">
-                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-20">
+                    <header className="border-b border-white/5 py-12 relative overflow-hidden">
+                        <div className="mx-auto max-w-[1700px] px-6 relative z-20">
                             {header}
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-b from-zend-900/20 to-transparent pointer-events-none"></div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/10 to-transparent pointer-events-none"></div>
                     </header>
                 )}
 
-                <main className="relative z-20">
+                <main className="relative z-20 flex-1 max-w-[1700px] mx-auto w-full px-6 py-10">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -201,15 +158,15 @@ export default function AuthenticatedLayout({ header, children }) {
                 </main>
             </div>
             
-            <footer className="py-12 mt-20 border-t border-dark-border relative z-10 bg-dark-bg/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:text-left">
+            <footer className="py-12 mt-auto border-t border-white/5 relative z-10 bg-white/[0.01]">
+                <div className="max-w-[1700px] mx-auto px-6 text-center sm:flex sm:justify-between sm:text-left">
                     <div>
-                        <p className="text-slate-500 text-sm">© {new Date().getFullYear()} ZendPC - Proyecto Final de Grado</p>
+                        <p className="text-slate-500 text-sm font-bold uppercase tracking-widest">© {new Date().getFullYear()} ZendPC - Industrial Grade</p>
                     </div>
                     <div className="mt-4 sm:mt-0 flex gap-6 justify-center">
-                        <Link href="/" className="text-slate-500 hover:text-zend-400 text-sm transition-colors">Inicio</Link>
-                        <Link href="/builder" className="text-slate-500 hover:text-zend-400 text-sm transition-colors">Configurador</Link>
-                        <Link href="/catalog" className="text-slate-500 hover:text-zend-400 text-sm transition-colors">Catálogo</Link>
+                        <Link href="/" className="text-slate-500 hover:text-indigo-400 text-xs font-black uppercase tracking-[0.2em] transition-colors">Inicio</Link>
+                        <Link href="/builder" className="text-slate-500 hover:text-indigo-400 text-xs font-black uppercase tracking-[0.2em] transition-colors">Configurador</Link>
+                        <Link href="/catalog" className="text-slate-500 hover:text-indigo-400 text-xs font-black uppercase tracking-[0.2em] transition-colors">Catálogo</Link>
                     </div>
                 </div>
             </footer>

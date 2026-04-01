@@ -8,43 +8,42 @@ export default function Dashboard({ configuracionesGuardadas }) {
     return (
         <AuthenticatedLayout
             header={
-                <div>
-                    <h2 className="text-4xl font-extrabold tracking-tight text-white mb-2">
-                        Mi Taller <span className="text-zend-500">Zend</span>
+                <div className="relative z-10">
+                    <h2 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white mb-2">
+                        Mi <span className="text-indigo-500">Taller</span>
                     </h2>
-                    <p className="text-slate-400">Gestiona tus presupuestos y configuraciones guardadas.</p>
+                    <p className="text-slate-400 font-medium uppercase tracking-[0.2em] text-[10px]">Espacio de trabajo de grado industrial.</p>
                 </div>
             }
         >
             <Head title="Mi Taller - ZendPC" />
+            <div className="py-12 relative z-10">
 
-            <div className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                
                 {/* User Stats Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <div className="glass-panel p-6 rounded-2xl flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-xl bg-zend-600/20 flex items-center justify-center text-zend-400">
+                    <div className="glass-card-premium p-8 rounded-[2rem] flex items-center gap-6 border border-white/5 hover:border-indigo-500/20 transition-all">
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/10 shadow-[0_0_20px_rgba(79,70,229,0.2)]">
                              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                         </div>
                         <div>
-                             <div className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Configuraciones</div>
-                             <div className="text-3xl font-bold text-white leading-tight">{buildCount}</div>
+                             <div className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Montajes Totales</div>
+                             <div className="text-3xl font-black text-white italic tracking-tighter leading-none">{buildCount}</div>
                         </div>
                     </div>
                     
-                    <div className="glass-panel p-6 rounded-2xl flex items-center gap-6">
-                        <div className="w-14 h-14 rounded-xl bg-emerald-600/20 flex items-center justify-center text-emerald-400">
+                    <div className="glass-card-premium p-8 rounded-[2rem] flex items-center gap-6 border border-white/5 hover:border-emerald-500/20 transition-all">
+                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
                         <div>
-                             <div className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Valor Estimado</div>
-                             <div className="text-3xl font-bold text-white leading-tight">{totalSpent.toLocaleString('es-ES')} <span className="text-emerald-500 text-xl">€</span></div>
+                             <div className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">Valor del Portfolio</div>
+                             <div className="text-3xl font-black text-white italic tracking-tighter leading-none">{totalSpent.toLocaleString('es-ES')} <span className="text-emerald-500 text-xl">€</span></div>
                         </div>
                     </div>
 
-                    <div className="glass-panel p-6 rounded-2xl flex flex-col justify-center">
-                         <Link href={route('builder.index')} className="btn-primary w-full text-center flex items-center justify-center gap-2 py-3">
-                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    <div className="flex flex-col justify-center">
+                         <Link href={route('builder.index')} className="px-10 py-5 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:bg-indigo-500 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-sm italic">
+                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                              Nuevo Proyecto
                          </Link>
                     </div>
@@ -53,19 +52,19 @@ export default function Dashboard({ configuracionesGuardadas }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {configuracionesGuardadas && configuracionesGuardadas.length > 0 ? (
                         configuracionesGuardadas.map((config) => (
-                            <div key={config.id} className="glass-panel rounded-3xl overflow-hidden flex flex-col group hover:border-zend-500/50 transition-all duration-300">
-                                <div className="h-24 bg-gradient-to-r from-dark-card to-dark-bg border-b border-dark-border p-6 flex justify-between items-center">
-                                     <div className="w-12 h-12 rounded-xl bg-dark-bg border border-dark-border flex items-center justify-center text-zend-400 group-hover:scale-110 transition-transform">
-                                          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            <div key={config.id} className="glass-card-premium rounded-[2.5rem] overflow-hidden flex flex-col group border border-white/5 hover:border-indigo-500/30 transition-all duration-500">
+                                <div className="h-28 bg-white/[0.02] border-b border-white/5 p-8 flex justify-between items-center group-hover:bg-white/[0.04] transition-colors">
+                                     <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(79,70,229,0.2)]">
+                                          <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                      </div>
                                      <div className="text-right">
-                                          <div className="text-xs text-slate-500 uppercase tracking-widest leading-none mb-1">Presupuesto</div>
-                                          <div className="text-xl font-bold text-white leading-none">{Number(config.total_price).toLocaleString('es-ES')} €</div>
+                                          <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-2">Manifiesto de Montaje</div>
+                                          <div className="text-2xl font-black text-white italic leading-none">{Number(config.total_price).toLocaleString('es-ES')} €</div>
                                      </div>
                                 </div>
                                 
-                                <div className="p-6 flex-grow">
-                                     <h3 className="text-xl font-bold text-white mb-4 group-hover:text-zend-400 transition-colors leading-tight">{config.name}</h3>
+                                <div className="p-8 flex-grow">
+                                     <h3 className="text-xl font-black italic uppercase tracking-tight text-white mb-6 group-hover:text-indigo-300 transition-colors leading-tight">{config.name}</h3>
                                      
                                      {/* Mocking a list of components based on logic if available or just placeholders */}
                                      {/* Usually savedConfig has a components JSON */}

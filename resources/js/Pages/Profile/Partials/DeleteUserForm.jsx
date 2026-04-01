@@ -7,7 +7,7 @@ import TextInput from '@/Components/TextInput';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
 
-export default function DeleteUserForm({ className = '' }) {
+export default function DeleteUserForm({ className = '', hasPassword }) {
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
     const passwordInput = useRef();
 
@@ -21,6 +21,7 @@ export default function DeleteUserForm({ className = '' }) {
         clearErrors,
     } = useForm({
         password: '',
+        confirmation_text: '',
     });
 
     const confirmUserDeletion = () => {
@@ -70,42 +71,67 @@ export default function DeleteUserForm({ className = '' }) {
 
                     <p className="mt-1 text-sm text-slate-400">
                         Una vez que se elimine tu cuenta, todos sus recursos y datos se borrarán de forma permanente. 
-                        Por favor, introduce tu contraseña para confirmar que deseas eliminar permanentemente tu cuenta.
+                        {hasPassword && ' Por favor, introduce tu contraseña para confirmar que deseas eliminar permanentemente tu cuenta.'}
                     </p>
 
-                    <div className="mt-6">
-                        <InputLabel
-                            htmlFor="password"
-                            value="Password"
-                            className="sr-only"
-                        />
+                    {hasPassword ? (
+                        <div className="mt-6">
+                            <InputLabel
+                                htmlFor="password"
+                                value="Password"
+                                className="sr-only"
+                            />
 
-                        <TextInput
-                            id="password"
-                            type="password"
-                            name="password"
-                            ref={passwordInput}
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            className="mt-1 block w-3/4"
-                            isFocused
-                            placeholder="Password"
-                        />
+                            <TextInput
+                                id="password"
+                                type="password"
+                                name="password"
+                                ref={passwordInput}
+                                value={data.password}
+                                onChange={(e) =>
+                                    setData('password', e.target.value)
+                                }
+                                className="mt-1 block w-3/4"
+                                isFocused
+                                placeholder="Password"
+                            />
 
-                        <InputError
-                            message={errors.password}
-                            className="mt-2"
-                        />
-                    </div>
+                            <InputError
+                                message={errors.password}
+                                className="mt-2"
+                            />
+                        </div>
+                    ) : (
+                        <div className="mt-6">
+                            <InputLabel
+                                htmlFor="confirmation_text"
+                                value="Escribe 'ELIMINAR' para confirmar"
+                                className="text-slate-300 mb-1"
+                            />
+
+                            <TextInput
+                                id="confirmation_text"
+                                type="text"
+                                name="confirmation_text"
+                                value={data.confirmation_text}
+                                onChange={(e) =>
+                                    setData('confirmation_text', e.target.value)
+                                }
+                                className="mt-1 block w-3/4"
+                                isFocused
+                                placeholder="ELIMINAR"
+                            />
+                        </div>
+                    )}
 
                     <div className="mt-6 flex justify-end gap-3">
                         <SecondaryButton onClick={closeModal}>
                             Cancelar
                         </SecondaryButton>
 
-                        <DangerButton disabled={processing}>
+                        <DangerButton 
+                            disabled={processing || (!hasPassword && data.confirmation_text !== 'ELIMINAR')}
+                        >
                             Confirmar Eliminación
                         </DangerButton>
                     </div>

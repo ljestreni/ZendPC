@@ -5,16 +5,25 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\CompatibilityService;
+use App\Services\PerformanceService;
+use App\Services\TechnicalSummaryService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ZendBuilderController extends Controller
 {
     protected $compatibilityService;
+    protected $performanceService;
+    protected $technicalSummaryService;
 
-    public function __construct(CompatibilityService $compatibilityService)
-    {
+    public function __construct(
+        CompatibilityService $compatibilityService,
+        PerformanceService $performanceService,
+        TechnicalSummaryService $technicalSummaryService
+    ) {
         $this->compatibilityService = $compatibilityService;
+        $this->performanceService = $performanceService;
+        $this->technicalSummaryService = $technicalSummaryService;
     }
 
     /**
@@ -44,10 +53,23 @@ class ZendBuilderController extends Controller
             }
         }
 
-        // Validate
-        $result = $this->compatibilityService->validateConfig($components);
+        // Validate Compatibility
+        $compResult = $this->compatibilityService->validateConfig($components);
 
-        return response()->json($result);
+        // Get Performance Estimates
+        $perfResult = $this->performanceService->estimateFps(
+            $components['cpu'] ?? null,
+            $components['gpu'] ?? null
+        );
+
+        // Get Technical Summary
+        $techResult = $this->technicalSummaryService->getSummary($components);
+
+        return response()->json([
+            'compatibility' => $compResult,
+            'performance' => $perfResult,
+            'technical' => $techResult
+        ]);
     }
     
     /**
@@ -57,8 +79,45 @@ class ZendBuilderController extends Controller
     {
         $category = Category::where('slug', $categorySlug)->firstOrFail();
         $query = $category->products();
+
+        // Aplicamos el filtro si el "socket-first" manda la plataforma
+        if ($request->has('platform')) {
+            $platform = $request->input('platform');
+
+            if (in_array($categorySlug, ['cpu', 'motherboard'])) {
+                // Normalizar plataforma para búsqueda (LGA 1700 vs LGA1700)
+                $normalized = str_replace([' ', '/', '-'], '', $platform);
+                $query->where(function($q) use ($platform, $normalized) {
+                    $q->where('specs->socket', $platform)
+                      ->orWhere('specs->socket', $normalized)
+                      ->orWhere('specs->socket', 'like', '%' . $platform . '%')
+                      ->orWhere('specs->socket', 'like', '%' . $normalized . '%');
+                });
+
+                // Si es placa base, también filtramos por el tipo de RAM que obliga el socket
+                if ($categorySlug === 'motherboard') {
+                    if ($platform === 'AM4') {
+                        $query->where('specs->memory_type', 'DDR4');
+                    } elseif ($platform === 'AM5') {
+                        $query->where('specs->memory_type', 'DDR5');
+                    }
+                }
+            } elseif ($categorySlug === 'cooler') {
+                $query->where(function($q) use ($platform) {
+                    $q->whereJsonContains('specs->socket', $platform)
+                      ->orWhere('specs->socket', 'like', '%' . $platform . '%');
+                });
+            } elseif ($categorySlug === 'ram') {
+                // Filtramos la RAM según lo admitido por el Socket
+                if ($platform === 'AM4') {
+                    $query->where('specs->type', 'DDR4');
+                } elseif ($platform === 'AM5') {
+                    $query->where('specs->type', 'DDR5');
+                }
+            }
+        }
+
         $productos = $query->get();
-        
         return response()->json($productos);
     }
 

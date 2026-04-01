@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "@heroicons/react": "^2.2.0",
-        "framer-motion": "^12.35.0"
+        "framer-motion": "^12.35.0",
+        "lodash": "^4.17.23"
     }
 }

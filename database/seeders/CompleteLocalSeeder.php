@@ -29,8 +29,8 @@ class CompleteLocalSeeder extends Seeder
             'cpu' => [
                 'name' => 'Procesadores', 'image' => 'https://m.media-amazon.com/images/I/51f2hk81eGL._AC_SL1000_.jpg',
                 'items' => [
-                    ['name' => 'AMD Ryzen 5 7600X', 'price' => 249.99, 'stock' => 50, 'url' => 'https://m.media-amazon.com/images/I/61sV6Z9lS1L._AC_SL1000_.jpg', 'desc' => '6 Cores, 12 Threads, 5.3GHz. Ideal Gaming 1080p.', 'specs' => ['socket' => 'AM5', 'tdp' => 105, 'cores' => 6]],
-                    ['name' => 'AMD Ryzen 7 7800X3D', 'price' => 399.99, 'stock' => 30, 'url' => 'https://m.media-amazon.com/images/I/61X-EaP0VIL._AC_SL1000_.jpg', 'desc' => '8 Cores con 3D V-Cache. El rey indiscutible del Gaming.', 'specs' => ['socket' => 'AM5', 'tdp' => 120, 'cores' => 8]],
+                    ['name' => 'AMD Ryzen 5 7600X', 'price' => 249.99, 'stock' => 50, 'url' => 'https://img.pccomponentes.com/articles/1057/10571167/1460-amd-ryzen-5-7600x-47-ghz-box.jpg', 'desc' => '6 Cores, 12 Threads, 5.3GHz. Ideal Gaming 1080p.', 'specs' => ['socket' => 'AM5', 'tdp' => 105, 'cores' => 6]],
+                    ['name' => 'AMD Ryzen 7 7800X3D', 'price' => 399.99, 'stock' => 30, 'url' => 'https://img.pccomponentes.com/articles/1069/10696956/1944-amd-ryzen-7-7800x3d-42ghz-5ghz-box.jpg', 'desc' => '8 Cores con 3D V-Cache. El rey indiscutible del Gaming.', 'specs' => ['socket' => 'AM5', 'tdp' => 120, 'cores' => 8]],
                     ['name' => 'AMD Ryzen 9 7950X3D', 'price' => 699.99, 'stock' => 15, 'url' => 'https://m.media-amazon.com/images/I/51f2hk81eGL._AC_SL1000_.jpg', 'desc' => '16 Cores. Potencia extrema para creadores y gamers.', 'specs' => ['socket' => 'AM5', 'tdp' => 120, 'cores' => 16]],
                     ['name' => 'AMD Ryzen 5 5600X', 'price' => 159.99, 'stock' => 100, 'url' => 'https://img.pccomponentes.com/articles/32/328475/1101-amd-ryzen-5-5600x-37ghz.jpg', 'desc' => 'El clásico calidad/precio en AM4.', 'specs' => ['socket' => 'AM4', 'tdp' => 65, 'cores' => 6]],
                     ['name' => 'AMD Ryzen 7 5800X3D', 'price' => 319.99, 'stock' => 25, 'url' => 'https://m.media-amazon.com/images/I/61Kq9Q5mDIL._AC_SL1000_.jpg', 'desc' => 'Actualización final para plataformas AM4.', 'specs' => ['socket' => 'AM4', 'tdp' => 105, 'cores' => 8]],
@@ -136,140 +136,98 @@ class CompleteLocalSeeder extends Seeder
                 'items' => [
                     ['name' => 'Noctua NH-D15', 'price' => 109.90, 'stock' => 30, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'La bestia por aire marrón.', 'specs' => ['type' => 'Air', 'tdp_rating' => 220]],
                     ['name' => 'Thermalright Peerless Assassin 120 SE', 'price' => 35.90, 'stock' => 100, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'Asesino de calidades a precio absurdo.', 'specs' => ['type' => 'Air', 'tdp_rating' => 200]],
-                    ['name' => 'Corsair iCUE H150i Elite Capellix XT', 'price' => 219.99, 'stock' => 15, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'AIO de 360mm, top RGB.', 'specs' => ['type' => 'AIO 360', 'tdp_rating' => 300]],
-                    ['name' => 'NZXT Kraken Elite 360 RGB', 'price' => 279.99, 'stock' => 10, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'Pantalla LCD en la bomba.', 'specs' => ['type' => 'AIO 360', 'tdp_rating' => 300]],
-                    ['name' => 'Arctic Liquid Freezer II 360', 'price' => 119.99, 'stock' => 45, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'Rendimiento bestial por el precio.', 'specs' => ['type' => 'AIO 360', 'tdp_rating' => 320]],
+                    ['name' => 'Corsair iCUE H150i Elite Capellix XT', 'price' => 219.99, 'stock' => 15, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'AIO de 360mm, top RGB.', 'specs' => ['type' => 'AIO', 'radiator_size' => 360, 'tdp_rating' => 300]],
+                    ['name' => 'NZXT Kraken Elite 360 RGB', 'price' => 279.99, 'stock' => 10, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'Pantalla LCD en la bomba.', 'specs' => ['type' => 'AIO', 'radiator_size' => 360, 'tdp_rating' => 300]],
+                    ['name' => 'Arctic Liquid Freezer II 360', 'price' => 119.99, 'stock' => 45, 'url' => 'https://static.arctic.de/media/4c/3d/8c/1630421441/liquid-freezer-ii-360-g01.jpg', 'desc' => 'Rendimiento bestial por el precio.', 'specs' => ['type' => 'AIO', 'radiator_size' => 360, 'tdp_rating' => 320]],
+                    ['name' => 'Arctic Liquid Freezer II 240', 'price' => 89.99, 'stock' => 45, 'url' => 'https://static.arctic.de/media/be/67/7d/1630421295/liquid-freezer-ii-240-g01.jpg', 'desc' => 'Dúo de radiadores 120.', 'specs' => ['type' => 'AIO', 'radiator_size' => 240, 'tdp_rating' => 250]],
                     ['name' => 'DeepCool AK620', 'price' => 64.99, 'stock' => 50, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'Doble torre oscuro e imponente.', 'specs' => ['type' => 'Air', 'tdp_rating' => 220]],
                     ['name' => 'Be quiet! Dark Rock Pro 4', 'price' => 89.90, 'stock' => 20, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'Silencio sepulcral.', 'specs' => ['type' => 'Air', 'tdp_rating' => 250]],
                     ['name' => 'Noctua NH-U12S chromax.black', 'price' => 79.95, 'stock' => 25, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'Excelente compatibilidad de RAM.', 'specs' => ['type' => 'Air', 'tdp_rating' => 165]],
                     ['name' => 'Cooler Master Hyper 212 Black Edition', 'price' => 39.99, 'stock' => 80, 'url' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg', 'desc' => 'El icónico disipador barato.', 'specs' => ['type' => 'Air', 'tdp_rating' => 150]],
-                    ['name' => 'Lian Li Galahad II Trinity 360', 'price' => 169.99, 'stock' => 20, 'url' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg', 'desc' => 'Aspecto espectacular en construcciones blancas.', 'specs' => ['type' => 'AIO 360', 'tdp_rating' => 300]],
                 ]
             ],
         ];
 
-        // 3. CARGAR ARCHIVOS EN MEMORIA PARA BÚSQUEDA RÁPIDA
-        $allFiles = Storage::disk('public')->files('products');
-        $fileInfo = [];
-        foreach ($allFiles as $f) {
-            $base = strtolower(basename($f));
-            $fileInfo[] = [
-                'path' => '/storage/' . $f,
-                'name' => $base,
-                'keywords' => explode('-', str_replace(['_', '.', ' '], '-', pathinfo($base, PATHINFO_FILENAME)))
-            ];
-        }
-
-        // Función auxiliar para encontrar la mejor imagen
-        $findBestImage = function($productName, $defaultUrl) use ($fileInfo) {
-            $nameKeywords = explode('-', Str::slug($productName));
-            $bestMatch = null;
-            $maxScore = 0;
-
-            foreach ($fileInfo as $info) {
-                $score = count(array_intersect($nameKeywords, $info['keywords']));
-                if ($score > $maxScore) {
-                    $maxScore = $score;
-                    $bestMatch = $info['path'];
-                }
-            }
-
-            // Exigimos un mínimo de coincidencia (por ejemplo, 2 palabras clave)
-            // Si no, usamos la URL remota
-            return ($maxScore >= 2) ? $bestMatch : $defaultUrl;
-        };
-
-        // 4. RECUPERACIÓN MASIVA POR ESCANEO
-        $categoriesMapping = [
-            'gpu' => ['rtx', 'gtx', 'radeon', 'rx-', 'gpu', 'geforce', 'nvidia', 'xtx', '4090', '4080', '4070', '4060', '7900', '7800', '7700', '7600', 'ventus', 'gaming-oc', 'aero', 'nitro', 'pulse', 'devil', 'speedster', 'challenger', 'suprim', 'strix-geforce'],
-            'motherboard' => ['placa', 'motherboard', 'b650', 'z790', 'x670', 'b550', 'z690', 'am5', 'lga1700', 'strix', 'aorus', 'tomahawk', 'mag-z', 'mag-b', 'prime-z', 'prime-b', 'crosshair', 'maximus', 'ace', 'hero', 'wifi', 'pro-z', 'pro-b'],
-            'ram' => ['ram', 'ddr4', 'ddr5', 'trident', 'vengeance', 'fury', 'dominator', 'kit', 'memory', 'g.skill', 'kingston', 'lexar', 'ares', 'crucial-pro', 'expert', 'zenith', 'cras', 'ripjaws'],
-            'storage' => ['ssd', 'nvme', 'sata', '980', '990', 'sn850', 'sn770', 'sn580', 'firecuda', 'barracuda', 'kc3000', 'crucial-p', 'crucial-t', 'mx500', '870-evo', 'pro-2tb', 'plus-2tb', 'nm800', 'platinum-p41', 'rocket-4'],
-            'psu' => ['psu', 'power', '850w', '750w', '1000w', '1200w', '650w', 'modular', 'rm850', 'rm750', 'rm1000', 'hx1000', 'hx1200', 'toughpower', 'seasonic', 'pure-power', 'a850gl', 'a1000g', 'a850g', 'supernova', 'fsp', 'hydro', 'thor', 'loki', 'vertex', 'p650b', 'c750', 'dark-power'],
-            'case' => ['case', 'torre', 'flow', 'nzxt-h', 'fractal', 'hyte', 'phanteks', 'lian', 'base-800', 'base-700', 'base-600', 'montech', 'airflow', 'o11', 'dynamic', 'h9', 'h7', 'h6', 'h5', 'torrent', 'north', 'y60', 'y40', 'nr200p', '2000d', 'lancool', 'air-903', 'nv7', 'g360a'],
-            'cooler' => ['cooler', 'fan', 'refrigeracion', 'noctua', 'arctic', 'kraken', 'liquid', 'freezer', 'nh-d15', 'nh-u', 'dark-rock', 'pure-loop', 'pure-rock', 'assassin', 'ak620', 'ryujin', 'capellix', 'hyper-212', 'galahad', 'elite-lcd', 'elite-capellix', 'nucleus', 'aio', 'cr360', 'h150i', 'h100i', 'h115i'],
-            'cpu' => ['ryzen', 'intel', 'core', 'i5-', 'i7-', 'i9-', 'i3-', '7800x3d', '7950x3d', '5600x', '5800x3d', '14900k', '13700k', '13600k', '12700k', '12400f', '9700x'],
-        ];
-
-        // Asegurar que las categorías existan
+        // Ensure categories exist
         $catModels = [];
         foreach ($catalog as $slug => $data) {
             $catModels[$slug] = Category::updateOrCreate(['slug' => $slug], [
                 'name' => $data['name'],
-                'image' => '/placeholder.jpg'
+                'image' => $data['image']
             ]);
         }
         
-        // Categoría para lo que no sepamos qué es
-        $miscCat = Category::updateOrCreate(['slug' => 'otros'], [
-            'name' => 'Otros/Varios',
-            'image' => '/placeholder.jpg'
-        ]);
-
-        foreach ($allFiles as $filePath) {
-            $slug = pathinfo(basename($filePath), PATHINFO_FILENAME);
-            if (Product::where('slug', $slug)->exists()) continue;
-
-            $detectedCatSlug = null;
-            foreach ($categoriesMapping as $catSlug => $keywords) {
-                foreach ($keywords as $kw) {
-                    if (str_contains(strtolower($slug), $kw)) {
-                        $detectedCatSlug = $catSlug;
-                        break 2;
-                    }
-                }
-            }
-
-            $catId = $detectedCatSlug ? $catModels[$detectedCatSlug]->id : $miscCat->id;
-
-            $name = str_replace(['-', '_'], ' ', $slug);
-            $name = str_ireplace([' fixed', ' fix', ' real', ' robust', ' v2', ' v1', ' original'], '', $name);
-            $name = ucwords($name);
-            $name = str_ireplace(
-                ['Amd', 'Intel', 'Rgb', 'Nvme', 'Pcie', 'Gpu', 'Psu', 'Rtx', 'Gtx', 'Ssd', 'Ddr5', 'Ddr4', 'Aio', 'Lcd', 'Evga', 'Nzxt', 'Msi', 'Asus', 'Lian Li', 'G.skill', 'Fsp', 'Xfx'], 
-                ['AMD', 'Intel', 'RGB', 'NVMe', 'PCIe', 'GPU', 'PSU', 'RTX', 'GTX', 'SSD', 'DDR5', 'DDR4', 'AIO', 'LCD', 'EVGA', 'NZXT', 'MSI', 'ASUS', 'Lian Li', 'G.Skill', 'FSP', 'XFX'], 
-                $name
-            );
+        // Cargar archivos en memoria para coincidencia EXACTA y FUZZY MATCH
+        $allFiles = Storage::disk('public')->files('products');
+        $localImages = [];
+        $fileInfo = [];
+        foreach ($allFiles as $f) {
+            $base = strtolower(basename($f));
+            $path = '/storage/' . $f;
+            $localImages[pathinfo($base, PATHINFO_FILENAME)] = $path;
             
-            // Limpiar múltiples espacios si los hay
-            $name = preg_replace('/\s+/', ' ', trim($name));
-
-            $product = Product::create([
-                'category_id' => $catId,
-                'name' => $name,
-                'slug' => $slug,
-                'description' => "Componente de hardware verificado: $name. Alto rendimiento garantizado.",
-                'price' => rand(45, 950) + 0.99,
-                'stock' => rand(10, 80),
-                'image' => '/storage/' . $filePath,
-                'specs' => ['recovered' => true],
-            ]);
-
-            // Actualizar imagen de categoría si es nueva
-            $currentCat = $detectedCatSlug ? $catModels[$detectedCatSlug] : $miscCat;
-            if ($currentCat->image === '/placeholder.jpg') {
-                $currentCat->update(['image' => '/storage/' . $filePath]);
+            if (str_ends_with($f, 'webp') || str_ends_with($f, 'jpg') || str_ends_with($f, 'png')) {
+                $fileInfo[] = [
+                    'path' => $path,
+                    'keywords' => explode('-', str_replace(['_', '.', ' '], '-', pathinfo($base, PATHINFO_FILENAME)))
+                ];
             }
         }
 
-        // 5. MANTENER Y REPARAR LOS 80 MANUALES
+        // 3. SOLO 80 PRODUCTOS MANUALES CURADOS
         foreach ($catalog as $catSlug => $data) {
             $cat = $catModels[$catSlug];
             foreach ($data['items'] as $item) {
+                // Generar slug del nombre para comparar con archivos existentes locales
                 $productSlug = Str::slug($item['name']);
                 
-                // Prioridad absoluta a la imagen local por fuzzy matching
-                $finalImage = $findBestImage($item['name'], $item['url']);
+                // Priority: Exact match -> Fuzzy match -> Stable URL -> Manual URL
+                $finalImage = $item['url'];
+                $isArctic = str_contains(strtolower($item['name']), 'arctic liquid freezer ii');
+                $isPccomponentes = str_contains($finalImage, 'pccomponentes.com');
                 
-                // Caso especial Ryzen 5600X (Si el usuario dio una URL específica, la respetamos solo si no hay local mejor)
-                if ($productSlug === 'amd-ryzen-5-5600x' && $finalImage === $item['url']) {
-                    $finalImage = $item['url'];
+                if (isset($localImages[$productSlug]) && !$isArctic) {
+                    $finalImage = $localImages[$productSlug];
+                } else if (!$isArctic && !$isPccomponentes) {
+                    // Start fuzzy match only if not Arctic and not PCComponentes 
+                    $nameKeywords = explode('-', $productSlug);
+                    $bestMatch = null;
+                    $maxScore = 0;
+                    foreach ($fileInfo as $info) {
+                        $score = count(array_intersect($nameKeywords, $info['keywords']));
+                        // special penalizations
+                        if (in_array('ddr4', $nameKeywords) && in_array('ddr5', $info['keywords'])) $score -= 10;
+                        if (in_array('ddr5', $nameKeywords) && in_array('ddr4', $info['keywords'])) $score -= 10;
+                        if ($score > $maxScore) {
+                            $maxScore = $score;
+                            $bestMatch = $info['path'];
+                        }
+                    }
+                    if ($maxScore >= 2 && $bestMatch) {
+                        $finalImage = $bestMatch;
+                    }
                 }
                 
+                // Manual hardcodes fallback for components lacking exact or fuzzy local images
+                if (str_contains($finalImage, 'amazon.com') || $finalImage == '/placeholder.jpg') {
+                    if (str_contains($item['name'], 'ASRock Z790')) $finalImage = '/storage/products/asus-prime-z790-a-wifi.jpg';
+                    if (str_contains($item['name'], 'Patriot Viper Steel')) $finalImage = '/storage/products/corsair-vengeance-lpx-ddr4-3600-32gb.jpg';
+                    if (str_contains($item['name'], 'Kingston NV2')) $finalImage = '/storage/products/crucial-p3-plus-2tb-nvme.jpg';
+                    if (str_contains($item['name'], 'Corsair HX1200')) $finalImage = '/storage/products/corsair-rm850x.png';
+                }
+
+                // Explicit Overrides for severe content mismatches (User's storage folder contains wrongly named files)
+                if ($productSlug === 'corsair-rm850x-2021') $finalImage = '/storage/products/corsair-rm850x.png';
+                if ($productSlug === 'evga-supernova-1000-g6') $finalImage = '/storage/products/evga-supernova-1000-g6_fix.jpg';
+                if ($productSlug === 'corsair-mp600-pro-lpx-2tb') $finalImage = '/storage/products/crucial-p3-plus-2tb-nvme.jpg';
+                if ($productSlug === 'crucial-pro-ram-32gb-ddr4-3200mhz') $finalImage = '/storage/products/crucial-pro-ddr5-5600-32gb.png';
+                if ($productSlug === 'gigabyte-rtx-4080-super-windforce') $finalImage = '/storage/products/gigabyte-gaming-oc-geforce-rtx-4080.jpg';
+                if ($productSlug === 'msi-rtx-4070-ti-super-ventus-3x') $finalImage = '/storage/products/msi-ventus-2x-geforce-rtx-4060.jpg';
+
                 Product::updateOrCreate(['slug' => $productSlug], [
                     'category_id' => $cat->id,
                     'name' => $item['name'],
-                    'description' => $item['desc'],
+                    'description' => $item['desc'] ?? '',
                     'price' => $item['price'],
                     'stock' => $item['stock'],
                     'image' => $finalImage,

@@ -15,6 +15,7 @@ ZendPC es una plataforma diseñada para la gestión y personalización de ordena
 - **Catálogo de Productos:** Visualización de componentes con diseño oscuro y premium.
 - **Configurador (Builder):** Módulo en desarrollo para la selección de componentes.
 - **Stack Tecnológico:** Construido con **Laravel 11**, **Inertia.js**, **React** y **Tailwind CSS**.
+- **Gestión de Imágenes:** Las imágenes de los productos son críticas y **no deben borrarse**. Se ha creado un backup de seguridad en `storage/app/backups/products/`.
 
 ---
 

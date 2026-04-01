@@ -1,47 +1,119 @@
-import { Link, Head, usePage } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Link, Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import axios from 'axios';
+import Modal from '@/Components/Modal';
+import Dropdown from '@/Components/Dropdown';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function Index({ auth }) {
+    const [showingMobileMenu, setShowingMobileMenu] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        
+        // Prevent body scroll on Desktop
+        if (window.innerWidth >= 1024) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.height = '100vh';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+        }
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+        }
+    }, [isMobile]);
+
+    const [selectedPlatform, setSelectedPlatform] = useState(null);
     const [config, setConfig] = useState({
         cpu: null, motherboard: null, ram: null, gpu: null,
-        storage: null, psu: null, case: null,
+        storage: null, psu: null, case: null, cooler: null
     });
 
-    const [activeCategory, setActiveCategory] = useState(null);
+    const [activeCategory, setActiveCategory] = useState('socket');
     const [products, setProducts] = useState([]);
     const [compatibility, setCompatibility] = useState({ valid: true, errors: [], alerts: [] });
+    const [performance, setPerformance] = useState({ competitive: 0, aaa: 0, ultra: 0, bottleneck: 100, reason: '' });
+    const [techSummary, setTechSummary] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPlatformConfirm, setShowPlatformConfirm] = useState(false);
+    
+    // Filtering State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 2500 });
+    const [activeFilters, setActiveFilters] = useState({});
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+    useEffect(() => {
+        // Reset filters when category changes
+        setSearchTerm('');
+        setPriceRange({ min: 0, max: 2500 });
+        setActiveFilters({});
+    }, [activeCategory]);
 
     const categories = [
+        { slug: 'socket', name: 'Plataforma Base', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
         { slug: 'cpu', name: 'Procesador', icon: 'M9 3V2m6 1v1m-6 18v1m6-1v1M3 9H2m1 6H2m18-6h1m-1 6h1M5 5h14v14H5V5zm6 2a2 2 0 100 4 2 2 0 000-4z' },
         { slug: 'motherboard', name: 'Placa Base', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
         { slug: 'ram', name: 'Memoria RAM', icon: 'M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2m-20 0v8a2 2 0 002 2h12a2 2 0 002-2v-8m-20 0h20M6 12h8m-8 4h4' },
         { slug: 'gpu', name: 'Tarjeta Gráfica', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' },
+        { slug: 'cooler', name: 'Refrigeración', icon: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z' },
         { slug: 'storage', name: 'Almacenamiento', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4' },
-        { slug: 'psu', name: 'Fuente', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+        { slug: 'psu', name: 'Fuente P.', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
         { slug: 'case', name: 'Caja/Torre', icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z' },
     ];
 
-    const fetchProducts = async (categorySlug) => {
+    const handlePlatformSelect = (platform) => {
+        setSelectedPlatform(platform);
+        setIsLoading(true);
+        setActiveCategory('cpu');
+        setShowingMobileMenu(false);
+        
+        const platformParam = `?platform=${platform}`;
+        axios.get(route('builder.products', 'cpu') + platformParam)
+            .then(response => {
+                setProducts(response.data);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                console.error("Error fetching CPUs:", error);
+                setIsLoading(false);
+            });
+    };
+
+    const handleCategoryClick = async (categorySlug) => {
         setIsLoading(true);
         setActiveCategory(categorySlug);
-        try {
-            const response = await axios.get(route('builder.products', categorySlug));
-            setProducts(response.data);
-        } catch (error) {
-            console.error("Error fetching products:", error);
+        setShowingMobileMenu(false);
+        if (categorySlug === 'socket') {
+            setProducts([]);
+            setIsLoading(false);
+        } else {
+            try {
+                const platformParam = selectedPlatform ? `?platform=${selectedPlatform}` : '';
+                const response = await axios.get(route('builder.products', categorySlug) + platformParam);
+                setProducts(response.data);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     const selectProduct = (categorySlug, product) => {
         const newConfig = { ...config, [categorySlug]: product };
         setConfig(newConfig);
         validateConfig(newConfig);
-        // Automatically open the next empty category
-        const keys = categories.map(c => c.slug);
+        
+        // Find next empty category
+        const keys = categories.map(c => c.slug).filter(s => s !== 'socket');
         const currentIndex = keys.indexOf(categorySlug);
         let nextSlug = null;
         for (let i = currentIndex + 1; i < keys.length; i++) {
@@ -50,7 +122,8 @@ export default function Index({ auth }) {
                 break;
             }
         }
-        if (nextSlug) fetchProducts(nextSlug);
+        if (nextSlug) handleCategoryClick(nextSlug);
+        else setActiveCategory(null);
     };
 
     const removeProduct = (categorySlug) => {
@@ -72,22 +145,199 @@ export default function Index({ auth }) {
         
         try {
             const response = await axios.post(route('builder.validate'), { components });
-            // Simulate advanced response for now if backend doesn't return full structure
-            let fallbackResult = response.data;
-            if (fallbackResult.valid === undefined) {
-               fallbackResult = { valid: true, errors: [], alerts: [] }; // Mock if API only returns early bool
-            }
-            setCompatibility(fallbackResult);
+            const { compatibility: compResult, performance: perfResult, technical: techResult } = response.data;
+            
+            setCompatibility(compResult || { valid: true, errors: [], alerts: [] });
+            setPerformance(perfResult || { competitive: 0, aaa: 0, ultra: 0, bottleneck: 100, reason: '' });
+            setTechSummary(techResult || null);
         } catch (error) {
             console.error("Validation error:", error);
         }
     };
+
+    const confirmPlatformChange = () => {
+        setSelectedPlatform(null); 
+        const resetConfig = {};
+        Object.keys(config).forEach(k => resetConfig[k] = null);
+        setConfig(resetConfig);
+        setCompatibility({ valid: true, errors: [], alerts: [] });
+        handleCategoryClick('socket');
+        setShowPlatformConfirm(false);
+    };
+
+    const formatSpecKey = (key) => {
+        const dictionary = {
+            socket: 'Socket',
+            tdp: 'TDP',
+            cores: 'Núcleos',
+            threads: 'Hilos',
+            frequency: 'Frecuencia',
+            boost_freq: 'Turbo',
+            form_factor: 'Formato',
+            chipset: 'Chipset',
+            ram_slots: 'Ranuras RAM',
+            max_ram: 'RAM Máxima',
+            m2_slots: 'Extra M.2',
+            type: 'Tipo',
+            capacity: 'Capacidad',
+            speed: 'Velocidad',
+            modules: 'Módulos',
+            latency: 'Latencia',
+            vram: 'VRAM',
+            base_clock: 'Reloj Base',
+            boost_clock: 'Reloj Turbo',
+            clock_speed: 'Reloj Base',
+            length: 'Longitud',
+            wattage: 'Potencia',
+            efficiency: 'Eficiencia',
+            modular: 'Modular',
+            read_speed: 'Lectura',
+            write_speed: 'Escritura',
+            interface: 'Interfaz',
+            size: 'Tamaño',
+            rpm: 'RPM',
+            noise_level: 'Ruido',
+            water_cooled: 'Líquida',
+            radiator_size: 'Radiador',
+            side_panel: 'Panel',
+            color: 'Color',
+            power_connectors: 'Conectores PCIe',
+            max_cooler_height: 'Altura Máx. CPU',
+            height: 'Altura',
+            max_gpu_length: 'Largo Máx. GPU',
+            perf_score: 'Potencia Base'
+        };
+        return dictionary[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+    };
+
+    const formatSpecValue = (key, value) => {
+        if (value === null || value === undefined) return value;
+        
+        // Handle Arrays (Sockets, Radiator Support, etc)
+        if (Array.isArray(value)) {
+            const formattedItems = value.map(item => {
+                if (key === 'radiator_support' && !String(item).toLowerCase().includes('mm')) return `${item} mm`;
+                return item;
+            });
+            return formattedItems.join(', ');
+        }
+
+        const lowerVal = String(value).toLowerCase();
+        
+        const unitMap = {
+            tdp: 'W',
+            wattage: 'W',
+            vram: 'GB',
+            capacity: 'GB',
+            max_ram: 'GB',
+            read_speed: 'MB/s',
+            write_speed: 'MB/s',
+            length: 'mm',
+            height: 'mm',
+            width: 'mm',
+            radiator_size: 'mm',
+            max_cooler_height: 'mm',
+            max_gpu_length: 'mm',
+            noise_level: 'dB',
+            rpm: 'RPM',
+            cores: 'Ndos'
+        };
+
+        // Special handling for speeds and frequencies
+        if (key === 'speed' || key === 'base_clock' || key === 'boost_clock' || key === 'clock_speed') {
+            if (!lowerVal.includes('mhz') && !lowerVal.includes('ghz') && !lowerVal.includes('mt')) {
+                const numericVal = parseInt(value);
+                return isNaN(numericVal) ? value : (numericVal > 1000 ? `${value} MHz` : `${value} GHz`);
+            }
+        }
+
+        if (key === 'frequency' || key === 'boost_freq') {
+            if (!lowerVal.includes('ghz') && !lowerVal.includes('mhz')) {
+                return `${value} GHz`;
+            }
+        }
+
+        if (key === 'latency' && !lowerVal.includes('cl')) return `CL${value}`;
+
+        let unit = unitMap[key];
+        if (unit && !lowerVal.includes(unit.toLowerCase())) {
+            return `${value} ${unit}`;
+        }
+
+        if (typeof value === 'boolean' || lowerVal === 'true' || lowerVal === 'false' || lowerVal === '1' || lowerVal === '0') {
+             return (lowerVal === 'true' || lowerVal === '1') ? 'Sí' : 'No';
+        }
+        
+        return value;
+    };
+
+    const getSyncLevel = (product) => {
+        let level = 1;
+        const currentBrands = Object.values(config)
+            .filter(Boolean)
+            .map(p => p.specs?.brand || p.name.split(' ')[0]);
+            
+        const prodBrand = product.specs?.brand || product.name.split(' ')[0];
+        
+        if (currentBrands.includes(prodBrand)) {
+            level++;
+        } else if (currentBrands.length === 0) {
+            level++;
+        }
+        
+        if (parseFloat(product.price) > 100 || (product.specs && Object.keys(product.specs).length > 2)) {
+            level++;
+        }
+        
+        return Math.min(3, level);
+    };
+
+    const calculateTotal = () => {
+        return Object.values(config).reduce((total, item) => total + (item ? parseFloat(item.price) : 0), 0).toFixed(2);
+    };
+
+    const getFilteredProducts = () => {
+        return products.filter(p => {
+            // Basic Filters
+            const nameMatch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const priceMatch = parseFloat(p.price) >= priceRange.min && parseFloat(p.price) <= priceRange.max;
+            
+            if (!nameMatch || !priceMatch) return false;
+
+            // Technical Spec Filters
+            if (Object.keys(activeFilters).length > 0) {
+                for (const [key, value] of Object.entries(activeFilters)) {
+                    if (!value) continue;
+                    const specVal = p.specs ? p.specs[key] : null;
+                    
+                    if (key === 'type' || key === 'memory_type' || key === 'socket') {
+                        if (specVal !== value) return false;
+                    }
+                    if (key === 'vram' || key === 'capacity') {
+                        if (parseInt(specVal) < parseInt(value)) return false;
+                    }
+                    if (key === 'cores') {
+                        if (parseInt(specVal) < parseInt(value)) return false;
+                    }
+                }
+            }
+            return true;
+        });
+    };
+
+    const filteredProducts = getFilteredProducts();
+
+    // Calculate progress (out of total valid categories minus socket)
+    const validConfigKeys = Object.values(config).filter(v => v !== null).length;
+    const progressPercentage = (validConfigKeys / (categories.length - 1)) * 100;
 
     const saveConfig = () => {
         if (!auth.user) {
              window.location.href = route('login');
              return;
         }
+        if (!compatibility.valid) return alert("Corrige los problemas de compatibilidad antes de guardar.");
+        
         const name = prompt("Introduce un nombre para tu nuevo proyecto:");
         if (!name) return;
 
@@ -100,247 +350,589 @@ export default function Index({ auth }) {
              name, components, total_price: calculateTotal()
         }).then(() => {
              window.location.href = route('dashboard');
-        }).catch(error => {
-             alert("Error guardando el proyecto.");
-        });
+        }).catch(() => alert("Error al guardar el proyecto."));
     };
 
-    const calculateTotal = () => {
-        return Object.values(config).reduce((total, item) => total + (item ? parseFloat(item.price) : 0), 0).toFixed(2);
-    };
+    const rightPanelContent = (
+        <AnimatePresence mode="wait">
+            {activeCategory === 'socket' ? (
+                <motion.div 
+                    key="socket"
+                    initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }}
+                    className="glass-card-premium p-8 rounded-3xl"
+                >
+                    <div className="text-center mb-10">
+                        <div className="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 border border-indigo-500/20">
+                            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={categories[0].icon} /></svg>
+                        </div>
+                        <h2 className="text-3xl font-black text-white tracking-tight mb-2 uppercase italic">Configurador de PC Zend</h2>
+                        <p className="text-slate-400 max-w-lg mx-auto">Selecciona tu plataforma básica. El sistema ajustará automáticamente las piezas para garantizar que todo encaje a la perfección.</p>
+                    </div>
 
-    const progressPercentage = (Object.values(config).filter(v => v !== null).length / categories.length) * 100;
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            { id: 'AM5', name: 'AMD Ryzen AM5', desc: 'Zen 4/5, DDR5, PCIe 5.0', color: 'from-orange-500/20 to-red-500/10', border: 'hover:border-orange-500/50', accent: 'text-orange-400' },
+                            { id: 'AM4', name: 'AMD Ryzen AM4', desc: 'Zen 3, DDR4, Máxima Eficiencia', color: 'from-emerald-500/20 to-teal-500/10', border: 'hover:border-emerald-500/50', accent: 'text-emerald-400' },
+                            { id: 'LGA 1700', name: 'Intel LGA 1700', desc: 'Gen 12-14, Híbrida, DDR4/DDR5', color: 'from-blue-500/20 to-indigo-500/10', border: 'hover:border-blue-500/50', accent: 'text-blue-400' }
+                        ].map(p => (
+                            <button 
+                                key={p.id}
+                                onClick={() => handlePlatformSelect(p.id)} 
+                                className={`group glass-panel relative overflow-hidden p-6 rounded-2xl border border-white/5 ${p.border} transition-all duration-500 flex flex-col items-center text-center hover:-translate-y-1`}
+                            >
+                                <div className={`absolute inset-0 bg-gradient-to-br ${p.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                                <div className="relative z-10">
+                                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4 border border-white/10 group-hover:scale-110 transition-transform">
+                                        <span className={`font-black text-xs ${p.accent}`}>{p.id.split(' ')[0]}</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-white mb-2 tracking-tight uppercase">{p.name}</h3>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{p.desc}</p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                </motion.div>
+            ) : activeCategory ? (
+                <motion.div 
+                    key={activeCategory}
+                    initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+                    className="flex-1 flex flex-col lg:overflow-hidden lg:min-h-0"
+                >
+                    {/* Integrated Header */}
+                    <div className="glass-card-premium p-4 rounded-2xl mb-6 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={categories.find(c => c.slug === activeCategory)?.icon} /></svg>
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-0.5">Piezas Sugeridas</div>
+                                <h2 className="text-xl font-black text-white uppercase tracking-tight italic">
+                                    {categories.find(c => c.slug === activeCategory)?.name}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <div className="relative flex-grow md:w-64">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    placeholder="Modelo o marca..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full bg-dark-bg/50 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all outline-none"
+                                />
+                            </div>
+                            <button onClick={() => setShowMobileFilters(true)} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-colors">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Inventory Scroll Area */}
+                    <div className="flex-1 relative min-h-0">
+                        {isLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-12 h-12 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                            </div>
+                        ) : (
+                            <div className="absolute inset-0 overflow-y-auto pr-2 styled-scrollbar pb-10">
+                                <div className="grid grid-cols-1 gap-4">
+                                    {filteredProducts.length > 0 ? (
+                                    filteredProducts.map((product, idx) => (
+                                        <motion.div 
+                                            key={product.id} 
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            transition={{ duration: 0.4, ease: "easeOut", delay: Math.min(idx * 0.05, 0.5) }}
+                                            className="glass-card-premium group relative overflow-hidden p-5 rounded-2xl border border-white/5 hover:border-indigo-500/40 transition-all duration-500 flex flex-col md:flex-row gap-6 hover:shadow-[0_0_40px_rgba(99,102,241,0.05)]"
+                                        >
+                                            <div className="w-full md:w-44 h-44 shrink-0 bg-white rounded-xl p-4 flex items-center justify-center overflow-hidden relative transition-all duration-500">
+                                                {product.image ? (
+                                                    <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-700" />
+                                                ) : (
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Sin Imagen</div>
+                                                )}
+                                                <div className="absolute top-2 left-2 px-2 py-0.5 bg-dark-bg/80 backdrop-blur rounded text-[9px] font-bold text-white border border-white/10 uppercase tracking-tighter">
+                                                    {product.specs?.brand || (product.name.split(' ')[0])}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex-grow flex flex-col min-w-0">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="min-w-0">
+                                                        <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-indigo-300 transition-colors truncate tracking-tight uppercase italic">{product.name}</h4>
+                                                        <div className="flex flex-wrap gap-2 mb-4">
+                                                            {product.specs && Object.entries(product.specs).slice(0, 4).map(([k, v]) => (
+                                                                <span key={k} className="status-pill text-slate-500 bg-white/5 border border-white/5">
+                                                                    {formatSpecKey(k)}: <span className="text-slate-300">{formatSpecValue(k, v)}</span>
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <div className="text-3xl font-black text-white tracking-widest">{Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-indigo-400 text-lg ml-1">€</span></div>
+                                                        <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">Pieza Verificada</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <p className="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-6 opacity-70 italic font-medium">
+                                                    {product.description || "Componente verificado de alta fidelidad, seleccionado para maximizar el potencial de tu build ZendPC."}
+                                                </p>
+                                                
+                                                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                                                    <div className="flex gap-1.5 items-center">
+                                                        {[1, 2, 3].map(level => {
+                                                            const isMax = getSyncLevel(product) === 3;
+                                                            const isActive = getSyncLevel(product) >= level;
+                                                            return (
+                                                                <div key={level} className={`w-1.5 h-1.5 rounded-full ${isActive ? (isMax ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]') : 'bg-white/10'}`}></div>
+                                                            );
+                                                        })}
+                                                        <span className={`text-[8px] font-black uppercase tracking-widest ml-2 ${getSyncLevel(product) === 3 ? 'text-emerald-500' : 'text-slate-600'}`}>
+                                                            Compatibilidad de Piezas
+                                                        </span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => selectProduct(activeCategory, product)}
+                                                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl action-glow transition-all active:scale-95"
+                                                    >
+                                                        Añadir Selección
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center py-20 bg-white/2 rounded-3xl border border-white/5 italic text-slate-500">
+                                        <svg className="w-12 h-12 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                        <p className="text-sm font-bold uppercase tracking-widest">Sin Resultados Compatibles</p>
+                                    </div>
+                                )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </motion.div>
+            ) : (
+                progressPercentage === 100 ? (
+                    <motion.div 
+                        key="completed"
+                        initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+                        className="flex-1 flex flex-col items-center justify-center text-center p-8 glass-card-premium rounded-[2.5rem] relative overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-emerald-500/[0.02] pointer-events-none"></div>
+                        <div className="relative z-10">
+                            <div className="w-24 h-24 mx-auto mb-10 rounded-[2rem] bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.15)] relative">
+                                <div className="absolute inset-0 rounded-[2rem] border border-emerald-500/50 animate-ping opacity-20"></div>
+                                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                            </div>
+                            <h2 className="text-4xl font-black text-white uppercase tracking-tight italic mb-3">Piezas Listas</h2>
+                            <p className="text-slate-400 max-w-md mx-auto mb-10 text-sm font-medium">Todos los componentes han sido revisados. El equipo está equilibrado y listo para montar.</p>
+                            <div className="flex gap-4 justify-center">
+                                <button 
+                                    onClick={saveConfig}
+                                    disabled={!compatibility.valid}
+                                    className={`px-10 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl action-glow transition-all active:scale-95 ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                                >
+                                    Guardar Configuración
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
+                        <div className="w-20 h-20 mb-8 rounded-3xl border border-white/10 flex items-center justify-center animate-pulse shadow-[0_0_40px_rgba(255,255,255,0.05)]">
+                            <svg className="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        </div>
+                        <p className="text-sm font-black text-white uppercase tracking-[0.4em]">Iniciando Núcleo Zend...</p>
+                    </div>
+                )
+            )}
+        </AnimatePresence>
+    );
 
     return (
         <>
-            <Head title="ZendBuilder" />
-            <div className="min-h-screen bg-dark-bg text-slate-200">
-                {/* Navbar */}
-                <nav className="glass-nav">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between h-16">
-                            <div className="flex">
-                                <div className="shrink-0 flex items-center">
-                                    <Link href="/" className="flex items-center gap-2">
-                                        <img src="/logo.png" alt="ZendPC Logo" className="w-10 h-10 object-contain drop-shadow-lg rounded" />
-                                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-200 tracking-tight">ZendPC</h1>
+            <Head title="ZendBuilder | Premium PC Configurator" />
+            <div className="min-h-screen lg:h-screen bg-[#080a11] text-slate-200 selection:bg-indigo-500/30 overflow-x-hidden lg:overflow-hidden flex flex-col">
+                {/* Global Aura */}
+                <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+                
+                {/* Navbar Refinada */}
+                <nav className="glass-nav border-b-white/5 border-b-[0.5px]">
+                    <div className="max-w-[1700px] mx-auto px-6">
+                        <div className="flex justify-between h-20">
+                            <div className="flex items-center">
+                                <Link href="/" className="flex items-center gap-4 group">
+                                    <ApplicationLogo className="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
+                                </Link>
+                                <div className="hidden lg:flex ml-20 items-center gap-12">
+                                    <Link href={route('catalog.index')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                        Catálogo
                                     </Link>
-                                    <div className="ml-10 flex items-center space-x-4">
-                                        <Link href={route('catalog.index')} className="text-gray-400 hover:text-white transition-colors px-1 py-2 text-sm font-medium">Catálogo</Link>
-                                        <Link href={route('builder.index')} className="text-purple-400 border-b-2 border-purple-500 px-1 py-2 text-sm font-medium">Configurador</Link>
-                                    </div>
+                                    <Link href={route('builder.index')} className="text-white border-b-2 border-indigo-500 pb-1 text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                        Configurador
+                                    </Link>
+                                    <Link href={route('dashboard')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                        Mi Taller
+                                    </Link>
                                 </div>
                             </div>
-                            <div className="flex items-center">
+                            
+                            <div className="flex items-center gap-6">
                                 {auth.user ? (
-                                    <Link href={route('dashboard')} className="btn-secondary text-sm">Mi Taller</Link>
+                                    <Dropdown>
+                                        <Dropdown.Trigger>
+                                            <button className="flex items-center gap-4 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all group focus:outline-none">
+                                                <div className="text-right hidden sm:block">
+                                                    <div className="text-[11px] font-black text-white uppercase tracking-tight leading-none mb-1">{auth.user.name}</div>
+                                                    <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Panel Usuario</div>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/10 shadow-inner">
+                                                    {auth.user.name.charAt(0).toUpperCase()}
+                                                </div>
+                                            </button>
+                                        </Dropdown.Trigger>
+                                        <Dropdown.Content contentClasses="py-1 bg-[#0f121d] border border-white/5 rounded-xl shadow-2xl mt-2">
+                                            {auth.user.role === 'admin' && (
+                                                <>
+                                                    <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                        Admin Categorías
+                                                    </Dropdown.Link>
+                                                    <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                        Admin Productos
+                                                    </Dropdown.Link>
+                                                    <div className="border-t border-white/5 my-1"></div>
+                                                </>
+                                            )}
+                                            <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                Perfil de Usuario
+                                            </Dropdown.Link>
+                                            <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 text-sm font-medium w-full text-left">
+                                                Cerrar Sesión
+                                            </Dropdown.Link>
+                                        </Dropdown.Content>
+                                    </Dropdown>
                                 ) : (
-                                    <Link href={route('login')} className="text-sm font-medium text-purple-400 hover:text-purple-300">Inicia sesión para guardar</Link>
+                                    <Link href={route('login')} className="px-8 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-[10px] font-black uppercase tracking-widest hover:bg-white/[0.08] transition-all">
+                                        Sincronizar cuenta
+                                    </Link>
                                 )}
                             </div>
                         </div>
                     </div>
                 </nav>
 
-                {/* Progress Bar */}
-                <div className="w-full h-1 bg-dark-border">
-                    <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progressPercentage}%` }}
-                        className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
-                    />
-                </div>
-
-                <div className="py-8 max-w-[1400px] mx-auto sm:px-6 lg:px-8 relative z-10">
-                    <div className="flex flex-col lg:flex-row gap-8">
+                <div className="py-6 px-8 max-w-[1850px] mx-auto w-full flex-1 flex flex-col pb-32 lg:pb-[140px] lg:overflow-hidden lg:min-h-0 relative z-10">
+                    <div className="flex flex-col lg:flex-row gap-8 items-stretch h-full lg:overflow-hidden lg:min-h-0 flex-1">
                         
-                        {/* Summary / Config Left Panel */}
-                        <div className="w-full lg:w-[400px] flex-shrink-0">
-                            <div className="glass-panel sm:rounded-2xl p-6 sticky top-24">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">ZendBuilder</h2>
-                                    <div className="text-xs font-mono bg-dark-bg px-2 py-1 rounded border border-dark-border text-indigo-400">
-                                        {Math.round(progressPercentage)}% COMPLETADO
+                        {/* Column 1: Vertical Progress Nav (Left) */}
+                        <aside className="w-full lg:w-[320px] flex-shrink-0 flex flex-col lg:h-full lg:overflow-hidden">
+                            <div className="glass-card-premium p-6 rounded-[2.5rem] flex flex-col h-full border border-white/5 shadow-2xl relative">
+                                <div className="flex items-center justify-between mb-10 px-2">
+                                    <div className="hud-label tracking-[0.3em]">Progreso del Montaje</div>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] animate-pulse"></div>
+                                        <span className="text-[11px] font-black text-white italic tracking-tighter">{Math.round(progressPercentage)}%</span>
                                     </div>
                                 </div>
-                                
-                                <AnimatePresence>
-                                    {!compatibility.valid && (
-                                        <motion.div 
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            exit={{ opacity: 0, height: 0 }}
-                                            className="bg-red-900/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl mb-6 shadow-[0_0_15px_rgba(239,68,68,0.1)]"
-                                        >
-                                            <div className="flex items-center gap-2 mb-2 font-bold text-red-400">
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                                ¡Conflicto Detectado!
+
+                                <div className="flex-1 relative min-h-0">
+                                    <div className="absolute inset-0 space-y-2.5 overflow-y-auto styled-scrollbar pr-1.5 pb-4">
+                                        {categories.map((cat, idx) => {
+                                        const isSocket = cat.slug === 'socket';
+                                        const isSelected = isSocket ? !!selectedPlatform : !!config[cat.slug];
+                                        const isActive = activeCategory === cat.slug;
+                                        const isDisabled = !isSocket && !selectedPlatform;
+
+                                        return (
+                                            <button 
+                                                key={cat.slug} 
+                                                disabled={isDisabled}
+                                                onClick={() => isSocket && isSelected ? setShowPlatformConfirm(true) : handleCategoryClick(cat.slug)}
+                                                className={`group w-full text-left p-4 rounded-3xl border transition-all duration-500 relative ${isDisabled ? 'opacity-20 cursor-not-allowed grayscale border-transparent' : 'cursor-pointer'} ${isActive ? 'bg-indigo-500/[0.07] border-indigo-500/50 shadow-[inset_0_0_20px_rgba(99,102,241,0.05)]' : isSelected ? 'bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40' : 'bg-white/[0.01] border-white/[0.03] hover:border-white/20'}`}
+                                            >
+                                                {isActive && <div className="absolute inset-0 bg-indigo-500/[0.03] rounded-3xl" />}
+                                                
+                                                <div className="flex items-center justify-between gap-4 relative z-10">
+                                                    <div className="flex items-center gap-4 min-w-0">
+                                                        <div className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-700 flex items-center justify-center ${isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.5)] scale-110' : isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? 2.5 : 2} d={cat.icon} /></svg>
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <span className={`block text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isActive ? 'text-indigo-400' : isSelected ? 'text-emerald-400' : 'text-slate-500'}`}>{cat.name}</span>
+                                                            {isSelected ? (
+                                                                <span className="block text-[11px] font-black text-white truncate max-w-full italic tracking-tight">
+                                                                    {isSocket ? selectedPlatform : config[cat.slug].name}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="block text-[9px] font-black text-slate-800 uppercase tracking-widest italic">En espera...</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    {isSelected && (
+                                                        <div className="shrink-0 w-5 h-5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                                            <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        );
+                                    })}
+                                    </div>
+                                </div>
+                                {!compatibility.valid && (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mt-6 pt-4 border-t border-red-500/10 text-red-400 flex-shrink-0">
+                                        <div className="flex items-center gap-2 font-black text-[10px] uppercase mb-2 tracking-widest">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                            Incompatible
+                                        </div>
+                                        <ul className="text-[10px] opacity-70 list-disc ml-5 space-y-1 font-bold italic">
+                                            {compatibility.errors?.map((err, idx) => <li key={idx}>{err}</li>)}
+                                        </ul>
+                                    </motion.div>
+                                )}
+                            </div>
+                        </aside>
+
+                        {/* Column 2: Content (Middle) */}
+                        <main className="flex-1 min-w-0 flex flex-col lg:h-full lg:overflow-hidden lg:min-h-0">
+                            {rightPanelContent}
+                        </main>
+
+                        {/* Column 3: HUD / Technical (Right) */}
+                        <aside className="w-full lg:w-[360px] flex-shrink-0 flex flex-col lg:h-full lg:overflow-hidden lg:min-h-0 pb-4">
+                            <div className="flex-1 relative min-h-0">
+                                <div className="absolute inset-0 space-y-8 overflow-y-auto styled-scrollbar pr-2 pb-10">
+                                    {/* Technical Dashboard */}
+                                <div className="glass-card-premium p-8 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                                        <svg className="w-32 h-32 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 3v2m6-1v1m-6 18v1m6-1v1M3 9H2m1 6H2m18-6h1m-1 6h1M5 5h14v14H5V5zm6 2a2 2 0 100 4 2 2 0 000-4z" /></svg>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-4 mb-10 relative z-10">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                        </div>
+                                        <div className="hud-label tracking-[0.3em] font-black">Detalles de las Piezas</div>
+                                    </div>
+
+                                    {techSummary ? (
+                                        <div className="space-y-8 relative z-10">
+                                            {/* Power Meter */}
+                                            <div>
+                                                <div className="flex justify-between items-end mb-3">
+                                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic font-bold">Consumo de Energía</span>
+                                                    <span className={`text-[11px] font-black tracking-widest ${techSummary.energy.status > 85 ? 'text-orange-400' : 'text-emerald-400'}`}>
+                                                        {techSummary.energy.estimated}W <span className="text-slate-600 mx-1">/</span> {techSummary.energy.capacity ? `${techSummary.energy.capacity}W` : '---'}
+                                                    </span>
+                                                </div>
+                                                <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden p-0.5 border border-white/5 ring-1 ring-white/5">
+                                                    <motion.div 
+                                                        initial={{ width: 0 }} 
+                                                        animate={{ width: `${Math.min(techSummary.energy.status || 0, 100)}%` }}
+                                                        transition={{ duration: 1.5, ease: "circOut" }}
+                                                        className={`h-full rounded-full ${techSummary.energy.status > 85 ? 'bg-gradient-to-r from-orange-500 to-red-600 shadow-[0_0_15px_rgba(249,115,22,0.6)]' : 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]'}`} 
+                                                    />
+                                                </div>
                                             </div>
-                                            <ul className="list-disc ml-5 text-sm space-y-1">
-                                                {compatibility.errors?.map((err, idx) => <li key={idx}>{err}</li>) || <li>Incompatibilidad técnica de sockets o estándares.</li>}
-                                            </ul>
+
+                                            {/* Physical Clearances */}
+                                            <div className="grid grid-cols-2 gap-5">
+                                                {[
+                                                    { label: 'Longitud GPU', val: techSummary.clearances.gpu.current, max: techSummary.clearances.gpu.max, valid: techSummary.clearances.gpu.is_valid, icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+                                                    { label: 'Altura Cooler', val: techSummary.clearances.cooler.current, max: techSummary.clearances.cooler.max, valid: techSummary.clearances.cooler.is_valid, icon: 'M12 3v1m0 16v1' }
+                                                ].map((c, i) => (
+                                                    <div key={i} className="bg-white/[0.02] p-5 rounded-3xl border border-white/5 group hover:border-white/10 transition-colors">
+                                                        <div className="hud-label text-[8px] mb-3 opacity-50">{c.label}</div>
+                                                        <div className="flex items-end gap-2.5">
+                                                            <div className="text-lg font-black text-white italic tracking-tighter leading-none">{c.val || 0}</div>
+                                                            <div className="text-[10px] font-black text-slate-700 uppercase tracking-widest leading-none mb-1">/ {c.max || '---'}</div>
+                                                        </div>
+                                                        <div className="mt-3 flex items-center gap-2">
+                                                            <div className={`w-1.5 h-1.5 rounded-full ${c.valid ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'}`} />
+                                                            <span className={`text-[8px] font-black uppercase tracking-[0.2em] ${c.valid ? 'text-emerald-500' : 'text-red-500'}`}>{c.valid ? 'Apto' : 'Exceso'}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex gap-2.5">
+                                                <div className="flex-1 bg-white/[0.03] p-3 rounded-2xl text-center border border-white/5">
+                                                    <div className="hud-label text-[8px] mb-1.5 opacity-40">Infraestructura</div>
+                                                    <div className="text-[10px] font-black text-white uppercase tracking-widest">{techSummary.motherboard.type || 'S/N'}</div>
+                                                </div>
+                                                <div className="flex-1 bg-white/[0.03] p-3 rounded-2xl text-center border border-white/5">
+                                                    <div className="hud-label text-[8px] mb-1.5 opacity-40">Factor Forma</div>
+                                                    <div className="text-[10px] font-black text-white uppercase tracking-widest">{techSummary.motherboard.format || 'S/N'}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="py-16 text-center">
+                                            <div className="w-12 h-12 border-2 border-white/5 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                            <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em] italic">Esperando hardware...</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Gaming HUD Card */}
+                                <AnimatePresence>
+                                    {config.gpu && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+                                            className="glass-card-premium overflow-hidden rounded-[2.5rem] group relative border border-white/5 shadow-2xl"
+                                        >
+                                            <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-7 border-b border-white/5 flex items-center justify-between">
+                                                <div>
+                                                    <div className="hud-label tracking-[0.3em] text-indigo-400 mb-1">Rendimiento en Juegos</div>
+                                                    <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Base de datos v4.2</div>
+                                                </div>
+                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
+                                                    <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
+                                                </div>
+                                            </div>
+                                            <div className="p-8 space-y-6">
+                                                {[
+                                                    { label: 'Competitivo (1080p)', val: performance.competitive, max: 400, color: 'from-emerald-400' },
+                                                    { label: 'Triple A (1440p)', val: performance.aaa, max: 165, color: 'from-indigo-400' },
+                                                    { label: 'Ultra (4K)', val: performance.ultra, max: 100, color: 'from-purple-400' }
+                                                ].map((t, idx) => (
+                                                    <div key={idx}>
+                                                        <div className="flex justify-between items-end mb-2.5">
+                                                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.1em]">{t.label}</span>
+                                                            <span className="text-lg font-black text-white italic tracking-widest leading-none">{t.val}<span className="text-[9px] text-slate-600 ml-1 font-black">FPS</span></span>
+                                                        </div>
+                                                        <div className="h-1 bg-white/[0.03] rounded-full overflow-hidden p-[1px]">
+                                                            <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min((t.val / t.max) * 100, 100)}%` }} transition={{ duration: 1.5, delay: idx * 0.1 }} className={`h-full bg-gradient-to-r ${t.color} to-white shadow-[0_0_10px_rgba(255,255,255,0.1)]`} />
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                                {performance.bottleneck < 80 && (
+                                                    <div className="mt-8 p-5 bg-orange-500/[0.04] border border-orange-500/20 rounded-3xl relative overflow-hidden group/alert">
+                                                        <div className="absolute top-0 left-0 w-1 h-full bg-orange-500 group-hover/alert:w-full transition-all duration-700 opacity-20"></div>
+                                                        <div className="relative z-10">
+                                                            <div className="flex items-center gap-2.5 text-[9px] font-black text-orange-500 uppercase tracking-[0.2em] mb-2.5">
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                                Detección de Desbalance
+                                                            </div>
+                                                            <p className="text-[10px] text-orange-200/50 leading-relaxed font-bold tracking-tight italic">{performance.reason}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
-
-                                <div className="space-y-3">
-                                    {categories.map((cat) => {
-                                        const isSelected = !!config[cat.slug];
-                                        const isActive = activeCategory === cat.slug;
-                                        
-                                        return (
-                                            <div 
-                                                key={cat.slug} 
-                                                onClick={() => !isSelected && fetchProducts(cat.slug)}
-                                                className={`p-3 rounded-xl border transition-all duration-300 ${isActive ? 'bg-indigo-600/10 border-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.2)]' : isSelected ? 'bg-dark-bg border-emerald-500/30' : 'bg-dark-bg border-dark-border hover:border-indigo-500/50 cursor-pointer'}`}
-                                            >
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <svg className={`w-4 h-4 ${isSelected ? 'text-emerald-400' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={cat.icon} />
-                                                        </svg>
-                                                        <span className="font-semibold text-sm text-slate-300">{cat.name}</span>
-                                                    </div>
-                                                    {isSelected && (
-                                                        <button onClick={(e) => { e.stopPropagation(); removeProduct(cat.slug); }} className="text-red-400 hover:text-red-300 transition text-xs flex items-center gap-1 bg-red-400/10 px-2 py-0.5 rounded">
-                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg> Eliminar
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                
-                                                {isSelected ? (
-                                                    <div className="flex items-center gap-3 mt-2">
-                                                        {config[cat.slug].image && (
-                                                            <div className="w-10 h-10 rounded bg-white p-1 flex items-center justify-center shrink-0 border border-slate-100">
-                                                                <img src={config[cat.slug].image} alt="" className="max-w-full max-h-full object-contain" />
-                                                            </div>
-                                                        )}
-                                                        <div className="flex-grow min-w-0">
-                                                            <div className="text-sm font-medium text-slate-100 truncate">{config[cat.slug].name}</div>
-                                                            <div className="text-indigo-400 font-mono text-sm">{Number(config[cat.slug].price).toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-xs text-slate-600 mt-1 pl-6">Pendiente de selección</div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
                                 </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
 
-                                <div className="mt-8 pt-6 border-t border-dark-border">
-                                    <div className="flex justify-between items-end mb-6">
-                                        <span className="text-slate-400 uppercase text-xs font-bold tracking-widest">Presupuesto</span>
-                                        <span className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200">
-                                            {Number(calculateTotal()).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
-                                        </span>
-                                    </div>
-                                    <button 
-                                        onClick={saveConfig}
-                                        className={`w-full font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 ${!compatibility.valid ? 'bg-dark-bg text-slate-500 border border-dark-border cursor-not-allowed' : progressPercentage === 100 ? 'btn-success' : 'btn-primary'}`}
-                                        disabled={!compatibility.valid}
-                                    >
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
-                                        {progressPercentage === 100 ? 'Finalizar Construcción' : 'Guardar Progreso'}
-                                    </button>
+                {/* Main Action Bar (Floating) */}
+                <div className="fixed bottom-0 left-0 w-full z-[60] px-4 pb-4 pointer-events-none">
+                    <motion.div 
+                        initial={{ y: 120, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.8, ease: "circOut", delay: 0.5 }}
+                        className="max-w-[1700px] mx-auto glass-card-premium p-4 md:p-5 rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] border border-white/10 pointer-events-auto flex flex-col md:flex-row items-center justify-between gap-6"
+                    >
+                        <div className="flex items-center gap-8">
+                            <div className="hidden sm:block min-w-48">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="hud-label text-[9px] tracking-[0.2em] font-black">Sync Status</span>
+                                    <span className="text-[10px] font-black text-white italic">{Math.round(progressPercentage)}%</span>
+                                </div>
+                                <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden p-0.5 border border-white/5 ring-1 ring-white/5">
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }} transition={{ duration: 2 }} className="h-full bg-gradient-to-r from-indigo-700 via-indigo-400 to-white rounded-full shadow-[0_0_15px_rgba(99,102,241,0.7)]" />
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="hud-label text-[9px] mb-1 block tracking-[0.2em] opacity-40">Valoración del Proyecto</span>
+                                <div className="text-3xl font-black text-white tracking-widest leading-none italic">
+                                    {Number(calculateTotal()).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-xl text-indigo-600 ml-1">€</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Inventory Right Panel */}
-                        <div className="flex-grow">
-                            <AnimatePresence mode="wait">
-                                {activeCategory ? (
-                                    <motion.div 
-                                        key={activeCategory}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="bg-dark-bg/50 border border-dark-border rounded-2xl p-6"
-                                    >
-                                        <div className="flex items-center gap-3 mb-6 border-b border-dark-border pb-4">
-                                            <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={categories.find(c => c.slug === activeCategory)?.icon} /></svg>
-                                            </div>
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-white">
-                                                    Seleccionar {categories.find(c => c.slug === activeCategory)?.name}
-                                                </h2>
-                                                <p className="text-slate-400 text-sm">El motor Zend ha filtrado las opciones incompatibles.</p>
-                                            </div>
-                                        </div>
-
-                                        {isLoading ? (
-                                            <div className="flex py-20 items-center justify-center">
-                                                <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-4 styled-scrollbar overflow-y-auto max-h-[70vh] pr-2">
-                                                {products.length > 0 ? (
-                                                    products.map((product) => (
-                                                        <div key={product.id} className="glass-panel p-4 rounded-xl flex flex-col sm:flex-row gap-6 hover:border-indigo-500/50 transition-colors group">
-                                                            <div className="w-full sm:w-32 h-32 shrink-0 bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden border border-slate-100">
-                                                                {product.image ? (
-                                                                    <img src={product.image} alt={product.name} className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500" />
-                                                                ) : (
-                                                                    <span className="text-xs text-slate-500">Sin Imagen</span>
-                                                                )}
-                                                            </div>
-                                                            <div className="flex-grow flex flex-col justify-center min-w-0">
-                                                                <h4 className="font-bold text-lg text-slate-100 mb-1 truncate">{product.name}</h4>
-                                                                <p className="text-sm text-slate-400 line-clamp-2 mb-3">{product.description}</p>
-                                                                
-                                                                {product.specs && (
-                                                                    <div className="flex flex-wrap gap-2 mt-auto">
-                                                                        {Object.entries(product.specs).slice(0, 4).map(([k, v]) => (
-                                                                            <span key={k} className="px-2 py-1 bg-dark-bg border border-dark-border rounded text-xs text-slate-300 font-mono">
-                                                                                <span className="text-slate-500">{k}:</span> {v}
-                                                                            </span>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className="sm:w-32 shrink-0 flex flex-col items-end justify-center border-t sm:border-t-0 sm:border-l border-dark-border pt-4 sm:pt-0 sm:pl-6 mt-4 sm:mt-0">
-                                                                <div className="text-2xl font-bold text-white mb-3">
-                                                                    {Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })} <span className="text-indigo-400 text-lg">€</span>
-                                                                </div>
-                                                                <button 
-                                                                    onClick={() => selectProduct(activeCategory, product)}
-                                                                    className="w-full btn-primary px-0 text-sm py-2 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-                                                                >
-                                                                    Seleccionar
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <div className="text-center py-20 text-slate-500 flex flex-col items-center">
-                                                        <svg className="w-16 h-16 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                                                        <p>No hay inventario disponible con tu configuración actual.</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                ) : (
-                                    <motion.div 
-                                        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                        className="h-full flex flex-col items-center justify-center text-center py-32 px-4"
-                                    >
-                                        <div className="w-24 h-24 mb-6 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center border border-indigo-500/30">
-                                            <svg className="w-12 h-12 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-white mb-2">Bienvenido al Motor Zend</h3>
-                                        <p className="text-slate-400 max-w-md">Selecciona un componente en el menú lateral para empezar. Nuestro asistente validará automáticamente el TDP, dimensiones y cuellos de botella para que todo sea perfecto.</p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        <div className="flex items-center gap-4 w-full md:w-auto">
+                            <button 
+                                onClick={saveConfig}
+                                className={`flex-grow md:flex-none px-10 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 ${(!compatibility.valid || progressPercentage === 0) ? 'bg-white/5 text-slate-700 cursor-not-allowed border border-white/5 opacity-50 grayscale' : 'bg-indigo-600 hover:bg-white hover:text-indigo-900 border-indigo-600 shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer'}`}
+                                disabled={!compatibility.valid || progressPercentage === 0}
+                            >
+                                {progressPercentage === 100 ? 'Finalizar Construcción' : 'Sincronizar Manifiesto'}
+                            </button>
                         </div>
-                        
-                    </div>
+                    </motion.div>
                 </div>
             </div>
+
+            {/* Filter Modal */}
+            <Modal show={showMobileFilters} onClose={() => setShowMobileFilters(false)} maxWidth="md">
+                <div className="glass-card-premium p-8 border border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div className="flex justify-between items-center mb-6 relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                            </div>
+                            <h3 className="text-xl font-black text-white uppercase italic tracking-tight">Filtros Activos</h3>
+                        </div>
+                        <button onClick={() => setShowMobileFilters(false)} className="text-slate-500 hover:text-white transition-colors">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    
+                    <div className="space-y-8 relative z-10">
+                        <div>
+                            <div className="flex justify-between items-end mb-3">
+                                <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Presupuesto Máximo</label>
+                                <div className="text-lg font-black text-white italic">{priceRange.max} <span className="text-indigo-400 text-sm">€</span></div>
+                            </div>
+                            <input 
+                                type="range" 
+                                min="0" 
+                                max="2500" 
+                                step="50"
+                                value={priceRange.max}
+                                onChange={(e) => setPriceRange({...priceRange, max: parseInt(e.target.value)})}
+                                className="w-full accent-indigo-500 h-2 bg-white/5 rounded-lg appearance-none cursor-pointer"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="mt-10 relative z-10">
+                        <button onClick={() => setShowMobileFilters(false)} className="w-full px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_30px_rgba(99,102,241,0.3)] transition-all active:scale-95">
+                            Aplicar Preferencias
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Platform Reset Confirmation */}
+            <Modal show={showPlatformConfirm} onClose={() => setShowPlatformConfirm(false)} maxWidth="md">
+                <div className="glass-card-premium p-12 border border-white/10 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-red-300 to-red-600 animate-pulse"></div>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-24 h-24 rounded-[2rem] bg-red-500/10 flex items-center justify-center mb-8 border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.1)]">
+                            <svg className="w-12 h-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        </div>
+                        <h3 className="text-4xl font-black text-white italic mb-3 tracking-tighter uppercase leading-none">Reiniciar Sistema</h3>
+                        <p className="text-slate-500 text-[11px] font-black uppercase tracking-[0.2em] leading-relaxed mb-12 max-w-[300px]">
+                            La recalibración del zócalo requiere una purga total de la configuración actual.
+                        </p>
+                        <div className="flex w-full gap-5">
+                            <button onClick={() => setShowPlatformConfirm(false)} className="flex-1 px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 transition-all">Abortar</button>
+                            <button onClick={confirmPlatformChange} className="flex-1 px-8 py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] text-white bg-red-600 hover:bg-black hover:text-red-500 border-red-600 shadow-[0_0_40px_rgba(220,38,38,0.4)] transition-all">Confirmar Purga</button>
+                        </div>
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }
-

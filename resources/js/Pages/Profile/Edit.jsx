@@ -4,7 +4,7 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
-export default function Edit({ mustVerifyEmail, status }) {
+export default function Edit({ mustVerifyEmail, status, hasPassword }) {
     return (
         <AuthenticatedLayout
             header={
@@ -31,11 +31,11 @@ export default function Edit({ mustVerifyEmail, status }) {
 
                     <div className="glass-panel p-6 sm:rounded-3xl sm:p-10 border border-dark-border overflow-hidden relative">
                          <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full"></div>
-                        <UpdatePasswordForm className="max-w-xl relative z-10" />
+                        <UpdatePasswordForm hasPassword={hasPassword} className="max-w-xl relative z-10" />
                     </div>
 
                     <div className="glass-panel p-6 sm:rounded-3xl sm:p-10 border border-red-500/10 overflow-hidden relative">
-                        <DeleteUserForm className="max-w-xl" />
+                        <DeleteUserForm hasPassword={hasPassword} className="max-w-xl" />
                     </div>
                 </div>
             </div>

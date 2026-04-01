@@ -29,7 +29,7 @@ class GoogleController extends Controller
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
-                    'password' => bcrypt(Str::random(16)) // Random password
+                    'password' => null // No password for OAuth users
                 ]);
             } else {
                 // Update google ID if exists
