@@ -230,7 +230,7 @@ class ProductSeeder extends Seeder
             'price' => 104.99,
             'stock' => 60,
             'image' => 'https://m.media-amazon.com/images/I/71pC69I3lzL._AC_SL1500_.jpg',
-            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 360, 'color' => 'Black'],
+            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 360, 'max_cooler_height' => 170, 'color' => 'Black'],
         ]);
         
         Product::updateOrCreate(['slug' => 'nzxt-h510'], [
@@ -240,7 +240,7 @@ class ProductSeeder extends Seeder
             'price' => 89.99,
             'stock' => 50,
             'image' => 'https://m.media-amazon.com/images/I/61ngFwH62PL._AC_SL1500_.jpg',
-            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 381, 'color' => 'White'],
+            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 381, 'max_cooler_height' => 165, 'color' => 'White'],
         ]);
 
         Product::updateOrCreate(['slug' => 'fractal-design-north'], [
@@ -250,7 +250,7 @@ class ProductSeeder extends Seeder
             'price' => 149.99,
             'stock' => 20,
             'image' => 'https://m.media-amazon.com/images/I/81Mlt80G44L._AC_SL1500_.jpg',
-            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 355, 'color' => 'Black/Wood'],
+            'specs' => ['form_factor' => 'ATX', 'max_gpu_length' => 355, 'max_cooler_height' => 185, 'color' => 'Black/Wood'],
         ]);
 
         // --- Coolers (New Category) ---
@@ -266,7 +266,7 @@ class ProductSeeder extends Seeder
             'price' => 109.90,
             'stock' => 35,
             'image' => 'https://m.media-amazon.com/images/I/61WfB30yHjL._AC_SL1500_.jpg',
-            'specs' => ['type' => 'Air', 'tdp_rating' => 220, 'socket_support' => ['AM5', 'LGA1700']],
+            'specs' => ['type' => 'Air', 'height' => 165, 'tdp_rating' => 220, 'socket' => ['AM5', 'LGA1700']],
         ]);
 
         Product::updateOrCreate(['slug' => 'corsair-icue-h150i'], [
@@ -276,7 +276,7 @@ class ProductSeeder extends Seeder
             'price' => 219.99,
             'stock' => 15,
             'image' => 'https://m.media-amazon.com/images/I/71R2A0t0E5L._AC_SL1500_.jpg',
-            'specs' => ['type' => 'AIO 360mm', 'tdp_rating' => 300, 'socket_support' => ['AM5', 'LGA1700']],
+            'specs' => ['type' => 'AIO 360mm', 'height' => 52, 'tdp_rating' => 300, 'socket' => ['AM5', 'LGA1700']],
         ]);
     }
 }

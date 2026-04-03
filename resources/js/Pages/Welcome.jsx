@@ -35,7 +35,7 @@ export default function Welcome({ auth }) {
                                     </Link>
                                     <Link
                                         href={route('register')}
-                                        className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 shadow-[0_0_20px_rgba(16, 185, 129,,0.3)] text-[10px] font-black uppercase tracking-widest transition-all"
+                                        className="px-6 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 shadow-[0_0_20px_rgba(16, 185, 129,0.3)] text-[10px] font-black uppercase tracking-widest transition-all"
                                     >
                                         Registrarse
                                     </Link>
@@ -54,7 +54,7 @@ export default function Welcome({ auth }) {
                             transition={{ duration: 0.8, ease: "easeOut" }}
                             className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 mb-8"
                         >
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(52, 211, 153,,0.8)]"></span>
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(52, 211, 153,0.8)]"></span>
                             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-emerald-300">Premium PC Builder V2</span>
                         </motion.div>
 
@@ -65,7 +65,7 @@ export default function Welcome({ auth }) {
                             className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-slate-200 to-slate-500 uppercase italic tracking-tighter leading-[0.9] mb-8 drop-shadow-2xl"
                         >
                             Industrial Grade <br/>
-                            <span className="text-emerald-500 bg-none drop-shadow-[0_0_30px_rgba(16, 185, 129,,0.2)]">Custom Hardware</span>
+                            <span className="text-emerald-500 bg-none drop-shadow-[0_0_30px_rgba(16, 185, 129,0.2)]">Custom Hardware</span>
                         </motion.h1>
 
                         <motion.p 

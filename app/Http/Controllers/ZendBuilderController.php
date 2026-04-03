@@ -105,7 +105,9 @@ class ZendBuilderController extends Controller
             } elseif ($categorySlug === 'cooler') {
                 $query->where(function($q) use ($platform) {
                     $q->whereJsonContains('specs->socket', $platform)
-                      ->orWhere('specs->socket', 'like', '%' . $platform . '%');
+                      ->orWhereJsonContains('specs->socket_support', $platform)
+                      ->orWhere('specs->socket', 'like', '%' . $platform . '%')
+                      ->orWhere('specs->socket_support', 'like', '%' . $platform . '%');
                 });
             } elseif ($categorySlug === 'ram') {
                 // Filtramos la RAM según lo admitido por la Placa Base seleccionada o el Socket

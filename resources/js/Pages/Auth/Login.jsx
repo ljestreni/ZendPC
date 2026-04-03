@@ -30,7 +30,7 @@ export default function Login({ status, canResetPassword }) {
 
             <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 flex flex-col items-center">
                 <Link href="/" className="flex items-center gap-3">
-                    <img src="/logo.png" alt="ZendPC Logo" className="w-16 h-16 object-contain drop-shadow-[0_0_15px_rgba(52, 211, 153,,0.5)] rounded-2xl" />
+                    <img src="/logo.png" alt="ZendPC Logo" className="w-16 h-16 object-contain drop-shadow-[0_0_15px_rgba(52, 211, 153,0.5)] rounded-2xl" />
                     <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-zend-400 to-zend-200 tracking-tight">ZendPC</h1>
                 </Link>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-white">

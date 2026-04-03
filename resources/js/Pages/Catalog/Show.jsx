@@ -188,30 +188,88 @@ const getProductInsight = (name, categoryName) => {
 export default function Show({ auth, producto }) {
     const [activeTab, setActiveTab] = useState('resumen');
     const insight = getProductInsight(producto.name, producto.category?.name);
+    
+    const formatSpecKey = (key) => {
+        const dictionary = {
+            socket: 'Socket / Zócalo',
+            socket_support: 'Sockets Soportados',
+            tdp: 'Consumo TDP',
+            cores: 'Núcleos',
+            threads: 'Hilos',
+            frequency: 'Frecuencia Base',
+            boost_freq: 'Frecuencia Turbo',
+            form_factor: 'Factor de Forma',
+            chipset: 'Chipset',
+            ram_slots: 'Ranuras RAM',
+            max_ram: 'Capacidad Máx. RAM',
+            m2_slots: 'Ranuras M.2',
+            type: 'Tipo',
+            capacity: 'Capacidad',
+            speed: 'Velocidad / Frecuencia',
+            modules: 'Configuración Módulos',
+            latency: 'Latencia (CL)',
+            vram: 'Memoria VRAM',
+            base_clock: 'Reloj Base',
+            boost_clock: 'Reloj Turbo',
+            clock_speed: 'Reloj de Núcleo',
+            length: 'Longitud',
+            width: 'Anchura',
+            height: 'Altura',
+            wattage: 'Potencia Proporcionada',
+            efficiency: 'Certificación Energética',
+            modular: 'Gestión de Cables',
+            read_speed: 'Velocidad Lectura',
+            write_speed: 'Velocidad Escritura',
+            interface: 'Interfaz de Conexión',
+            size: 'Tamaño / Formato',
+            rpm: 'Velocidad Ventilador',
+            noise_level: 'Nivel Sonoro',
+            water_cooled: 'Refrigeración Líquida',
+            radiator_size: 'Tamaño Radiador',
+            side_panel: 'Panel Lateral',
+            color: 'Color / Acabado',
+            power_connectors: 'Conectores PCI-E',
+            max_cooler_height: 'Altura Máx. Disipador',
+            max_gpu_length: 'Longitud Máx. GPU',
+            perf_score: 'Índice de Rendimiento'
+        };
+        return dictionary[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    };
 
     const formatSpecValue = (key, val) => {
         if (val === null || val === undefined) return 'N/A';
-        const units = {
+        const lowerKey = key.toLowerCase();
+        
+        // Handle Boolean translations
+        if (typeof val === 'boolean') return val ? 'Si' : 'No';
+        if (val === 'true') return 'Si';
+        if (val === 'false') return 'No';
+
+        const unitMap = {
             vram: 'GB',
             capacity: 'GB',
             wattage: 'W',
-            speed: isNaN(val) ? '' : (parseInt(val) > 2000 ? 'MB/s' : 'MHz'),
-            length: 'mm',
-            height: 'mm',
-            width: 'mm',
-            cores: 'Ndos',
             tdp: 'W',
-            max_ram: 'GB',
+            speed: isNaN(val) ? '' : (parseInt(val) > 2000 ? 'MB/s' : 'MHz'),
+            read_speed: 'MB/s',
+            write_speed: 'MB/s',
             frequency: 'GHz',
             boost_freq: 'GHz',
             clock_speed: 'MHz',
             boost_clock: 'MHz',
             base_clock: 'MHz',
+            length: 'mm',
+            height: 'mm',
+            width: 'mm',
+            max_gpu_length: 'mm',
+            max_cooler_height: 'mm',
             radiator_size: 'mm',
             noise_level: 'dB',
-            rpm: 'RPM'
+            rpm: 'RPM',
+            voltage: 'V'
         };
-        let unit = units[key.toLowerCase()] || '';
+
+        const unit = unitMap[lowerKey] || '';
         return `${val}${unit ? ' ' + unit : ''}`;
     };
 
@@ -311,7 +369,7 @@ export default function Show({ auth, producto }) {
                         <span className="text-white">{producto.category?.name || 'Recursos'}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
-                        <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-500 drop-shadow-[0_0_8px_rgba(52, 211, 153,,0.8)]" />
+                        <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-500 drop-shadow-[0_0_8px_rgba(52, 211, 153,0.8)]" />
                         <span className="text-[9px] font-black text-emerald-400 tracking-widest lowercase">protocolo de verificación industrial activo</span>
                     </div>
                 </div>
@@ -418,7 +476,7 @@ export default function Show({ auth, producto }) {
                                             {activeTab === tab.id && (
                                                 <motion.div 
                                                     layoutId="active-pill"
-                                                    className="absolute inset-0 bg-emerald-600 rounded-xl shadow-[0_0_20px_rgba(16, 185, 129,,0.4)]"
+                                                    className="absolute inset-0 bg-emerald-600 rounded-xl shadow-[0_0_20px_rgba(16, 185, 129,0.4)]"
                                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                                 />
                                             )}
@@ -525,7 +583,7 @@ export default function Show({ auth, producto }) {
                                                             <div className="space-y-2">
                                                                 {Object.entries(group.content).slice(0, 4).map(([key, value]) => (
                                                                     <div key={key} className="flex justify-between items-center group/row">
-                                                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest truncate mr-2">{key.replace(/_/g, ' ')}</span>
+                                                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest truncate mr-2">{formatSpecKey(key)}</span>
                                                                         <span className="text-[10px] font-bold text-slate-300 italic whitespace-nowrap">{formatSpecValue(key, value)}</span>
                                                                     </div>
                                                                 ))}
@@ -542,7 +600,7 @@ export default function Show({ auth, producto }) {
                                                 <div className="absolute inset-0 dot-grid-pattern-slate opacity-10"></div>
                                                 <ArchiveBoxIcon className="absolute -right-8 -bottom-8 w-48 h-48 text-white/[0.02] -rotate-12" />
                                                 <h4 className="text-white font-black uppercase text-[9px] tracking-[0.4em] mb-8 flex items-center gap-4 pb-4 border-b border-white/5">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.5)]"></div>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,0.5)]"></div>
                                                     Manifiesto de Contenido
                                                 </h4>
                                                 <ul className="space-y-4 relative z-10">
@@ -568,7 +626,7 @@ export default function Show({ auth, producto }) {
                                                 only: ['cart']
                                             });
                                         }}
-                                        className="group relative w-full flex items-center justify-center px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-emerald-500 hover:-translate-y-1 active:translate-y-0 text-xs italic shadow-[0_15px_40px_rgba(16, 185, 129,,0.25)]"
+                                        className="group relative w-full flex items-center justify-center px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-emerald-500 hover:-translate-y-1 active:translate-y-0 text-xs italic shadow-[0_15px_40px_rgba(16, 185, 129,0.25)]"
                                     >
                                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-in-out"></div>
                                         <span className="relative z-10 flex items-center gap-3">

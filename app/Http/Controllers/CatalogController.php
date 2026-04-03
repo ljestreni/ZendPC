@@ -41,8 +41,11 @@ class CatalogController extends Controller
                 if (!empty($values)) {
                     $query->where(function($q) use ($key, $values) {
                         foreach ((array)$values as $value) {
-                            // Supposing specs is a JSON column
-                            $q->orWhere('specs->' . $key, $value);
+                            if (in_array($key, ['socket', 'socket_support'])) {
+                                $q->orWhere('specs->' . $key, 'like', '%' . $value . '%');
+                            } else {
+                                $q->orWhere('specs->' . $key, $value);
+                            }
                         }
                     });
                 }
@@ -62,35 +65,72 @@ class CatalogController extends Controller
                 $filterGroups = [];
                 foreach ($allSpecs as $spec) {
                     foreach ($spec as $key => $value) {
-                        // We skip technical scores for filters usually
                         if (in_array($key, ['perf_score', 'tdp'])) continue;
                         
                         if (!isset($filterGroups[$key])) {
                             $filterGroups[$key] = [];
                         }
-                        if (!in_array($value, $filterGroups[$key])) {
-                            $filterGroups[$key][] = $value;
+
+                        // If the value is an array (like socket list in new seeders)
+                        if (is_array($value)) {
+                            foreach ($value as $v) {
+                                if (is_string($v)) {
+                                    $v = trim($v);
+                                    if (!in_array($v, $filterGroups[$key])) {
+                                        $filterGroups[$key][] = $v;
+                                    }
+                                }
+                            }
+                        // Split by comma if it's a comma-separated string
+                        } else if (in_array($key, ['socket', 'socket_support']) && is_string($value) && str_contains($value, ',')) {
+                            $vals = array_map('trim', explode(',', $value));
+                            foreach ($vals as $v) {
+                                if (!in_array($v, $filterGroups[$key])) {
+                                    $filterGroups[$key][] = $v;
+                                }
+                            }
+                        } else {
+                            if (is_scalar($value) && !in_array($value, $filterGroups[$key])) {
+                                $filterGroups[$key][] = $value;
+                            }
                         }
                     }
                 }
                 
                 $translations = [
-                    'socket' => 'Socket / Conexión',
+                    'socket' => 'Socket / Plataforma',
+                    'socket_support' => 'Sockets Compatibles',
                     'memory_type' => 'Tipo de Memoria',
-                    'form_factor' => 'Tamaño / Formato',
+                    'form_factor' => 'Factor de Forma',
                     'chipset' => 'Chipset (Base)',
-                    'cores' => 'Núcleos',
-                    'vram' => 'Memoria de Gráfica',
-                    'efficiency' => 'Certificación / Eficiencia',
-                    'wattage' => 'Potencia (W)',
-                    'modular' => 'Cables Modulares',
-                    'capacity' => 'Capacidad / Almacenamiento',
+                    'cores' => 'Núcleos de Proceso',
+                    'threads' => 'Hilos de Trabajo',
+                    'vram' => 'Memoria de Gráfica (VRAM)',
+                    'efficiency' => 'Certificación Energética',
+                    'wattage' => 'Potencia Proporcionada',
+                    'modular' => 'Gestión de Cables',
+                    'capacity' => 'Capacidad / Espacio',
                     'interface' => 'Conexión / Interfaz',
                     'type' => 'Tipo de Unidad',
-                    'speed' => 'Velocidad',
-                    'series' => 'Gama / Serie',
-                    'integrated_graphics' => 'Gráficos Integrados',
-                    'architecture' => 'Arquitectura'
+                    'speed' => 'Velocidad / Frecuencia',
+                    'series' => 'Gama / Familia',
+                    'integrated_graphics' => 'Video Integrado',
+                    'architecture' => 'Microarquitectura',
+                    'radiator_size' => 'Tamaño de Radiador',
+                    'color' => 'Color Principal',
+                    'brand' => 'Fabricante / Marca',
+                    'max_gpu_length' => 'Longitud Máx. GPU',
+                    'max_cooler_height' => 'Altura Máx. Cooler',
+                    'tdp' => 'Consumo Térmico (TDP)',
+                    'latency' => 'Latencia (CL)',
+                    'voltage' => 'Voltaje Operativo',
+                    'read_speed' => 'Lectura Secuencial',
+                    'write_speed' => 'Escritura Secuencial',
+                    'length' => 'Longitud (mm)',
+                    'width' => 'Anchura (mm)',
+                    'height' => 'Altura (mm)',
+                    'rpm' => 'Velocidad Ventilador (RPM)',
+                    'noise_level' => 'Nivel de Ruido (dB)'
                 ];
                 
                 foreach($filterGroups as $key => $values) {

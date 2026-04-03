@@ -15,7 +15,7 @@ export default function GuestLayout({ children }) {
                 className="mb-10 text-center"
             >
                 <Link href="/" className="inline-block group mx-auto">
-                    <ApplicationLogo className="h-20 w-auto group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(16, 185, 129,,0.3)] mb-4" />
+                    <ApplicationLogo className="h-20 w-auto group-hover:scale-110 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(16, 185, 129,0.3)] mb-4" />
                     <span className="block text-2xl font-black text-white tracking-[0.2em] uppercase italic drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">ZEND<span className="text-emerald-500">PC</span></span>
                 </Link>
             </motion.div>

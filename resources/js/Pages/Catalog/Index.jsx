@@ -140,21 +140,33 @@ export default function Index({ auth, productos, categorias, filters, availableF
 
     const formatValue = (key, val) => {
         if (!val) return val;
+        const lowerKey = key.toLowerCase();
+        
+        // Handle Boolean translations
+        if (typeof val === 'boolean') return val ? 'Si' : 'No';
+        if (val === 'true') return 'Si';
+        if (val === 'false') return 'No';
+
         const units = {
             vram: 'GB',
             capacity: 'GB',
             wattage: 'W',
-            speed: isNaN(val) ? '' : (parseInt(val) > 2000 ? 'MB/s' : 'MHz'), // Simple heuristic for now
+            tdp: 'W',
+            speed: isNaN(val) ? '' : (parseInt(val) > 2000 ? 'MB/s' : 'MHz'),
+            read_speed: 'MB/s',
+            write_speed: 'MB/s',
             length: 'mm',
             height: 'mm',
             width: 'mm',
-            cores: 'Ndos'
+            max_gpu_length: 'mm',
+            max_cooler_height: 'mm',
+            radiator_size: 'mm',
+            cores: 'Núcleos',
+            threads: 'Hilos',
+            voltage: 'V'
         };
 
-        // Special case for speed if it's storage (heuristic: high speed = SSD MB/s)
-        let unit = units[key] || '';
-        
-        // If it's capacity and > 500, it might be GB, if 1 or 2 it might be TB (but we'll stick to GB for consistency if DB uses it)
+        let unit = units[lowerKey] || '';
         return `${val}${unit ? ' ' + unit : ''}`;
     };
 
@@ -241,7 +253,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                 className="w-full p-6 lg:p-8 flex items-center justify-between group/btn outline-none"
                             >
                                 <h3 className="font-black text-white uppercase tracking-[0.3em] text-[10px] items-center gap-3 flex">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.8)]"></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,0.8)]"></div>
                                     CATEGORÍAS
                                 </h3>
                                 <div className={`transition-transform duration-300 text-slate-500 group-hover/btn:text-white ${expandedGroups.includes('categories') ? 'rotate-180' : ''}`}>
@@ -260,7 +272,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                         <div className="px-6 lg:px-8 pb-8 space-y-2">
                                             <Link
                                                 href={route('catalog.index')}
-                                                className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${!filters.category ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
+                                                className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${!filters.category ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
                                             >
                                                 <div className="relative z-10">Todas las Unidades</div>
                                                 <div className="absolute right-4 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
@@ -271,7 +283,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                 <Link
                                                     key={cat.id}
                                                     href={route('catalog.index', { category: cat.slug })}
-                                                    className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${filters.category === cat.slug ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
+                                                    className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${filters.category === cat.slug ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
                                                 >
                                                     <div className="relative z-10 flex items-center gap-3 text-left">
                                                         {cat.name}
@@ -351,7 +363,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                     style={{ zIndex: maxPrice < (priceRange.max / 2) ? 35 : 34 }}
                                                 />
                                                 <div 
-                                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.5)] z-20"
+                                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,0.5)] z-20"
                                                     style={{ 
                                                         left: `calc(${Math.max(0, Math.min(100, ((minPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}% + ${10 - Math.max(0, Math.min(100, ((minPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100)) * 0.2}px)`,
                                                         right: `calc(${100 - Math.max(0, Math.min(100, ((maxPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}% + ${10 - (100 - Math.max(0, Math.min(100, ((maxPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))) * 0.2}px)` 

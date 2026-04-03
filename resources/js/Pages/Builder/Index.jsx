@@ -129,23 +129,34 @@ export default function Index({ auth }) {
         });
         
         const translations = {
-            socket: 'Socket / Conexión',
+            socket: 'Zócalo / Socket',
+            socket_support: 'Sockets Compatibles',
             memory_type: 'Tipo de Memoria',
-            form_factor: 'Tamaño / Formato',
+            form_factor: 'Factor de Forma',
             chipset: 'Chipset (Base)',
-            cores: 'Núcleos',
-            vram: 'Memoria de Gráfica',
-            efficiency: 'Certificación / Eficiencia',
-            wattage: 'Potencia (W)',
-            modular: 'Cables Modulares',
-            capacity: 'Capacidad / Almacenamiento',
+            cores: 'Núcleos de Proceso',
+            threads: 'Hilos de Trabajo',
+            vram: 'Memoria VRAM',
+            efficiency: 'Certificación Energética',
+            wattage: 'Potencia Proporcionada',
+            modular: 'Gestión de Cables',
+            capacity: 'Capacidad / Espacio',
             interface: 'Conexión / Interfaz',
             type: 'Tipo de Unidad',
-            speed: 'Velocidad',
+            speed: 'Velocidad / Frecuencia',
             latency: 'Latencia (CL)',
-            series: 'Gama / Serie',
-            integrated_graphics: 'Gráficos Integrados',
-            architecture: 'Arquitectura'
+            series: 'Gama / Familia',
+            integrated_graphics: 'Video Integrado',
+            architecture: 'Microarquitectura',
+            radiator_size: 'Tamaño de Radiador (mm)',
+            color: 'Color Principal',
+            brand: 'Fabricante / Marca',
+            max_gpu_length: 'Longitud Máx. GPU (mm)',
+            max_cooler_height: 'Altura Máx. Cooler (mm)',
+            tdp: 'Consumo (TDP) (W)',
+            voltage: 'Voltaje Operativo (V)',
+            read_speed: 'Lectura Secuencial (MB/s)',
+            write_speed: 'Escritura Secuencial (MB/s)'
         };
 
         return Object.entries(filterGroups).map(([key, values]) => {
@@ -289,20 +300,21 @@ export default function Index({ auth }) {
     const formatSpecKey = (key) => {
         const dictionary = {
             socket: 'Socket',
-            tdp: 'TDP',
+            socket_support: 'Soporte Socket',
+            tdp: 'Consumo TDP',
             cores: 'Núcleos',
             threads: 'Hilos',
             frequency: 'Frecuencia',
-            boost_freq: 'Turbo',
-            form_factor: 'Formato',
+            boost_freq: 'Turbo Boost',
+            form_factor: 'Factor de Forma',
             chipset: 'Chipset',
             ram_slots: 'Ranuras RAM',
             max_ram: 'RAM Máxima',
-            m2_slots: 'Extra M.2',
+            m2_slots: 'Ranuras M.2',
             type: 'Tipo',
             capacity: 'Capacidad',
             speed: 'Velocidad',
-            modules: 'Módulos',
+            modules: 'Configuración',
             latency: 'Latencia',
             vram: 'VRAM',
             base_clock: 'Reloj Base',
@@ -310,25 +322,25 @@ export default function Index({ auth }) {
             clock_speed: 'Reloj Base',
             length: 'Longitud',
             wattage: 'Potencia',
-            efficiency: 'Eficiencia',
-            modular: 'Modular',
+            efficiency: 'Certificación',
+            modular: 'Modularidad',
             read_speed: 'Lectura',
             write_speed: 'Escritura',
             interface: 'Interfaz',
             size: 'Tamaño',
-            rpm: 'RPM',
-            noise_level: 'Ruido',
-            water_cooled: 'Líquida',
+            rpm: 'Velocidad Ventilador',
+            noise_level: 'Nivel Ruido',
+            water_cooled: 'Refrig. Líquida',
             radiator_size: 'Radiador',
-            side_panel: 'Panel',
+            side_panel: 'Panel Lateral',
             color: 'Color',
-            power_connectors: 'Conectores PCIe',
+            power_connectors: 'Conectores PCI-E',
             max_cooler_height: 'Altura Máx. CPU',
             height: 'Altura',
             max_gpu_length: 'Largo Máx. GPU',
-            perf_score: 'Potencia Base'
+            perf_score: 'Puntuación Rendimiento'
         };
-        return dictionary[key] || key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+        return dictionary[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
 
     const formatSpecValue = (key, value) => {
@@ -530,7 +542,7 @@ export default function Index({ auth }) {
                     {/* Integrated Header */}
                     <div className="glass-card-premium p-4 rounded-2xl mb-6 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(52, 211, 153,,0.1)]">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(52, 211, 153,0.1)]">
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={categories.find(c => c.slug === activeCategory)?.icon} /></svg>
                             </div>
                             <div>
@@ -577,7 +589,7 @@ export default function Index({ auth }) {
                                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             transition={{ duration: 0.4, ease: "easeOut", delay: Math.min(idx * 0.05, 0.5) }}
-                                            className="glass-card-premium group relative overflow-hidden p-5 rounded-2xl border border-white/5 hover:border-emerald-500/40 transition-all duration-500 flex flex-col md:flex-row gap-6 hover:shadow-[0_0_40px_rgba(52, 211, 153,,0.05)]"
+                                            className="glass-card-premium group relative overflow-hidden p-5 rounded-2xl border border-white/5 hover:border-emerald-500/40 transition-all duration-500 flex flex-col md:flex-row gap-6 hover:shadow-[0_0_40px_rgba(52, 211, 153,0.05)]"
                                         >
                                             <div className="w-full md:w-44 h-44 shrink-0 bg-white rounded-xl p-4 flex items-center justify-center overflow-hidden relative transition-all duration-500">
                                                 {product.image ? (
@@ -618,7 +630,7 @@ export default function Index({ auth }) {
                                                             const isMax = getSyncLevel(product) === 3;
                                                             const isActive = getSyncLevel(product) >= level;
                                                             return (
-                                                                <div key={level} className={`w-1.5 h-1.5 rounded-full ${isActive ? (isMax ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(52, 211, 153,,0.8)]') : 'bg-white/10'}`}></div>
+                                                                <div key={level} className={`w-1.5 h-1.5 rounded-full ${isActive ? (isMax ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(52, 211, 153,0.8)]') : 'bg-white/10'}`}></div>
                                                             );
                                                         })}
                                                         <span className={`text-[8px] font-black uppercase tracking-widest ml-2 ${getSyncLevel(product) === 3 ? 'text-emerald-500' : 'text-slate-600'}`}>
@@ -672,7 +684,7 @@ export default function Index({ auth }) {
                             <button 
                                 onClick={addConfigToCart}
                                 disabled={!compatibility.valid}
-                                className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl border border-emerald-500/50 shadow-[0_0_20px_rgba(16, 185, 129,,0.3)] transition-all active:scale-95 text-xs flex items-center justify-center gap-2 ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                                className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl border border-emerald-500/50 shadow-[0_0_20px_rgba(16, 185, 129,0.3)] transition-all active:scale-95 text-xs flex items-center justify-center gap-2 ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                 Añadir a la Cesta
@@ -773,7 +785,7 @@ export default function Index({ auth }) {
                                 <div className="flex items-center justify-between mb-10 px-2">
                                     <div className="hud-label tracking-[0.3em]">Progreso del Montaje</div>
                                     <div className="flex items-center gap-2.5">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.8)] animate-pulse"></div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,0.8)] animate-pulse"></div>
                                         <span className="text-[11px] font-black text-white italic tracking-tighter">{Math.round(progressPercentage)}%</span>
                                     </div>
                                 </div>
@@ -791,13 +803,13 @@ export default function Index({ auth }) {
                                                 key={cat.slug} 
                                                 disabled={isDisabled}
                                                 onClick={() => isSocket && isSelected ? setShowPlatformConfirm(true) : handleCategoryClick(cat.slug)}
-                                                className={`group w-full text-left p-4 rounded-3xl border transition-all duration-500 relative ${isDisabled ? 'opacity-20 cursor-not-allowed grayscale border-transparent' : 'cursor-pointer'} ${isActive ? 'bg-emerald-500/[0.07] border-emerald-500/50 shadow-[inset_0_0_20px_rgba(52, 211, 153,,0.05)]' : isSelected ? 'bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40' : 'bg-white/[0.01] border-white/[0.03] hover:border-white/20'}`}
+                                                className={`group w-full text-left p-4 rounded-3xl border transition-all duration-500 relative ${isDisabled ? 'opacity-20 cursor-not-allowed grayscale border-transparent' : 'cursor-pointer'} ${isActive ? 'bg-emerald-500/[0.07] border-emerald-500/50 shadow-[inset_0_0_20px_rgba(52, 211, 153,0.05)]' : isSelected ? 'bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40' : 'bg-white/[0.01] border-white/[0.03] hover:border-white/20'}`}
                                             >
                                                 {isActive && <div className="absolute inset-0 bg-emerald-500/[0.03] rounded-3xl" />}
                                                 
                                                 <div className="flex items-center justify-between gap-4 relative z-10">
                                                     <div className="flex items-center gap-4 min-w-0">
-                                                        <div className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-700 flex items-center justify-center ${isActive ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16, 185, 129,,0.5)] scale-110' : isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
+                                                        <div className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-700 flex items-center justify-center ${isActive ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16, 185, 129,0.5)] scale-110' : isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? 2.5 : 2} d={cat.icon} /></svg>
                                                         </div>
                                                         <div className="min-w-0">
@@ -986,7 +998,7 @@ export default function Index({ auth }) {
                                     <span className="text-[10px] font-black text-white italic">{Math.round(progressPercentage)}%</span>
                                 </div>
                                 <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden p-0.5 border border-white/5 ring-1 ring-white/5">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }} transition={{ duration: 2 }} className="h-full bg-gradient-to-r from-emerald-700 via-emerald-400 to-white rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.7)]" />
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }} transition={{ duration: 2 }} className="h-full bg-gradient-to-r from-emerald-700 via-emerald-400 to-white rounded-full shadow-[0_0_15px_rgba(52, 211, 153,0.7)]" />
                                 </div>
                             </div>
                             <div className="flex flex-col">
@@ -1008,7 +1020,7 @@ export default function Index({ auth }) {
                                     </button>
                                     <button 
                                         onClick={addConfigToCart}
-                                        className="flex-1 md:flex-none px-6 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 bg-emerald-600 hover:bg-white hover:text-emerald-900 border border-emerald-500/50 shadow-[0_0_30px_rgba(52, 211, 153,,0.4)] flex items-center gap-2 justify-center"
+                                        className="flex-1 md:flex-none px-6 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 bg-emerald-600 hover:bg-white hover:text-emerald-900 border border-emerald-500/50 shadow-[0_0_30px_rgba(52, 211, 153,0.4)] flex items-center gap-2 justify-center"
                                     >
                                         <svg className="w-4 h-4 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                         Comprar PC
@@ -1081,7 +1093,7 @@ export default function Index({ auth }) {
                                     className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg z-30"
                                 />
                                 <div 
-                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.5)] z-20"
+                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,0.5)] z-20"
                                     style={{ 
                                         left: `calc(${Math.max(0, Math.min(100, (priceRange.min / 2500) * 100))}% + ${10 - Math.max(0, Math.min(100, (priceRange.min / 2500) * 100)) * 0.2}px)`,
                                         right: `calc(${100 - Math.max(0, Math.min(100, (priceRange.max / 2500) * 100))}% + ${10 - (100 - Math.max(0, Math.min(100, (priceRange.max / 2500) * 100))) * 0.2}px)` 
@@ -1146,7 +1158,7 @@ export default function Index({ auth }) {
                     </div>
 
                     <div className="p-6 border-t border-white/10 relative z-10 shrink-0 bg-[#0a0d16]">
-                        <button onClick={() => setShowMobileFilters(false)} className="w-full px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_30px_rgba(52, 211, 153,,0.3)] transition-all active:scale-95">
+                        <button onClick={() => setShowMobileFilters(false)} className="w-full px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_30px_rgba(52, 211, 153,0.3)] transition-all active:scale-95">
                             Aplicar Preferencias
                         </button>
                     </div>
