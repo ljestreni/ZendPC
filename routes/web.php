@@ -21,6 +21,14 @@ Route::post('/builder/validate', [ZendBuilderController::class, 'validateSelecti
 Route::post('/builder/save', [ZendBuilderController::class, 'save'])->name('builder.save')->middleware('auth');
 Route::get('/builder/products/{categorySlug}', [ZendBuilderController::class, 'getProducts'])->name('builder.products');
 
+use App\Http\Controllers\CartController;
+Route::prefix('cart')->name('cart.')->group(function () {
+    Route::post('/add', [CartController::class, 'add'])->name('add');
+    Route::post('/remove', [CartController::class, 'remove'])->name('remove');
+    Route::post('/update', [CartController::class, 'update'])->name('update');
+    Route::post('/bulk-add', [CartController::class, 'bulkAdd'])->name('bulkAdd');
+    Route::post('/clear', [CartController::class, 'clear'])->name('clear');
+});
 Route::middleware('auth')->group(function () {
     Route::get('/export/config/{savedConfig}/pdf', [ExportController::class, 'exportConfigPdf'])->name('export.config.pdf');
 });

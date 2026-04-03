@@ -1,10 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, Head } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Modal from '@/Components/Modal';
 import Dropdown from '@/Components/Dropdown';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+
+const EditablePrice = ({ value, onChange, min, max }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [localValue, setLocalValue] = useState(value);
+    
+    useEffect(() => setLocalValue(value), [value]);
+
+    if (isEditing) {
+        return (
+            <div className="relative inline-flex items-center">
+                <input 
+                    type="number" 
+                    autoFocus
+                    className="bg-white/[0.05] border border-emerald-500/50 rounded-lg pl-2 pr-5 py-0.5 w-[75px] text-lg font-black text-white italic outline-none focus:ring-1 focus:ring-emerald-500/50 block [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    value={localValue}
+                    onChange={e => {
+                        const val = e.target.value;
+                        if (val === '' || Number(val) >= 0) setLocalValue(val);
+                    }}
+                    onBlur={() => {
+                        setIsEditing(false);
+                        let val = parseInt(localValue);
+                        if (isNaN(val)) val = min;
+                        val = Math.max(min, Math.min(max, val));
+                        onChange(val);
+                    }}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') e.target.blur();
+                        if (e.key === 'ArrowUp') { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) + 10)); }
+                        if (e.key === 'ArrowDown') { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) - 10)); }
+                    }}
+                />
+                <div className="absolute right-0.5 inset-y-0 flex flex-col justify-center py-1">
+                    <button type="button" tabIndex="-1" onMouseDown={e => { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) + 10)); }} className="text-slate-500 hover:text-emerald-400 h-1/2 flex items-end pb-0.5 justify-center px-1">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                    </button>
+                    <button type="button" tabIndex="-1" onMouseDown={e => { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) - 10)); }} className="text-slate-500 hover:text-emerald-400 h-1/2 flex items-start pt-0.5 justify-center px-1">
+                        <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <span 
+            className="cursor-text hover:text-emerald-400 transition-colors border-b border-transparent hover:border-emerald-400/50 pb-[1px]" 
+            onClick={() => setIsEditing(true)}
+            title="Click para editar"
+        >
+            {value} <span className="text-emerald-400 text-sm">€</span>
+        </span>
+    );
+};
 
 export default function Index({ auth }) {
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
@@ -48,15 +101,82 @@ export default function Index({ auth }) {
     // Filtering State
     const [searchTerm, setSearchTerm] = useState('');
     const [priceRange, setPriceRange] = useState({ min: 0, max: 2500 });
-    const [activeFilters, setActiveFilters] = useState({});
+    const [selectedSpecs, setSelectedSpecs] = useState({});
+    const [expandedGroups, setExpandedGroups] = useState([]);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     useEffect(() => {
         // Reset filters when category changes
         setSearchTerm('');
         setPriceRange({ min: 0, max: 2500 });
-        setActiveFilters({});
+        setSelectedSpecs({});
     }, [activeCategory]);
+
+    const availableFilters = useMemo(() => {
+        if (!products || products.length === 0) return [];
+        const filterGroups = {};
+        products.forEach(p => {
+            if (p.specs) {
+                Object.entries(p.specs).forEach(([key, value]) => {
+                    // Exclusion list: internal metrics, dimensions, and redundant constraints (like socket, which is already fixed by the builder platform)
+                    if (['perf_score', 'tdp', 'length', 'height', 'width', 'max_gpu_length', 'max_cooler_height', 'brand', 'socket'].includes(key)) return;
+                    if (Array.isArray(value)) return; // Skip arrays like radiator_support for simplicity
+                    
+                    if (!filterGroups[key]) filterGroups[key] = [];
+                    if (!filterGroups[key].includes(value)) filterGroups[key].push(value);
+                });
+            }
+        });
+        
+        const translations = {
+            socket: 'Socket / Conexión',
+            memory_type: 'Tipo de Memoria',
+            form_factor: 'Tamaño / Formato',
+            chipset: 'Chipset (Base)',
+            cores: 'Núcleos',
+            vram: 'Memoria de Gráfica',
+            efficiency: 'Certificación / Eficiencia',
+            wattage: 'Potencia (W)',
+            modular: 'Cables Modulares',
+            capacity: 'Capacidad / Almacenamiento',
+            interface: 'Conexión / Interfaz',
+            type: 'Tipo de Unidad',
+            speed: 'Velocidad',
+            latency: 'Latencia (CL)',
+            series: 'Gama / Serie',
+            integrated_graphics: 'Gráficos Integrados',
+            architecture: 'Arquitectura'
+        };
+
+        return Object.entries(filterGroups).map(([key, values]) => {
+            return {
+                key,
+                name: translations[key] || (key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')),
+                options: values.sort()
+            };
+        });
+    }, [products]);
+
+    const handleSpecToggle = (key, value) => {
+        const newSpecs = { ...selectedSpecs };
+        if (!newSpecs[key]) {
+            newSpecs[key] = [value];
+        } else {
+            if (newSpecs[key].includes(value)) {
+                newSpecs[key] = newSpecs[key].filter(v => v !== value);
+                if (newSpecs[key].length === 0) delete newSpecs[key];
+            } else {
+                newSpecs[key].push(value);
+            }
+        }
+        setSelectedSpecs(newSpecs);
+    };
+
+    const toggleGroup = (key) => {
+        setExpandedGroups(prev => 
+            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+        );
+    };
 
     const categories = [
         { slug: 'socket', name: 'Plataforma Base', icon: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' },
@@ -98,7 +218,8 @@ export default function Index({ auth }) {
         } else {
             try {
                 const platformParam = selectedPlatform ? `?platform=${selectedPlatform}` : '';
-                const response = await axios.get(route('builder.products', categorySlug) + platformParam);
+                const motherboardParam = config.motherboard ? (selectedPlatform ? '&' : '?') + `motherboard=${config.motherboard.id}` : '';
+                const response = await axios.get(route('builder.products', categorySlug) + platformParam + motherboardParam);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -305,20 +426,13 @@ export default function Index({ auth }) {
             if (!nameMatch || !priceMatch) return false;
 
             // Technical Spec Filters
-            if (Object.keys(activeFilters).length > 0) {
-                for (const [key, value] of Object.entries(activeFilters)) {
-                    if (!value) continue;
+            if (Object.keys(selectedSpecs).length > 0) {
+                for (const [key, values] of Object.entries(selectedSpecs)) {
+                    if (!values || values.length === 0) continue;
                     const specVal = p.specs ? p.specs[key] : null;
+                    if (specVal === null || specVal === undefined) return false;
                     
-                    if (key === 'type' || key === 'memory_type' || key === 'socket') {
-                        if (specVal !== value) return false;
-                    }
-                    if (key === 'vram' || key === 'capacity') {
-                        if (parseInt(specVal) < parseInt(value)) return false;
-                    }
-                    if (key === 'cores') {
-                        if (parseInt(specVal) < parseInt(value)) return false;
-                    }
+                    if (!values.includes(specVal)) return false;
                 }
             }
             return true;
@@ -330,6 +444,21 @@ export default function Index({ auth }) {
     // Calculate progress (out of total valid categories minus socket)
     const validConfigKeys = Object.values(config).filter(v => v !== null).length;
     const progressPercentage = (validConfigKeys / (categories.length - 1)) * 100;
+
+    const addConfigToCart = () => {
+        if (!compatibility.valid) return alert("Corrige los problemas de compatibilidad antes de añadir al carrito.");
+        const items = [];
+        for (const [key, value] of Object.entries(config)) {
+             if (value) items.push({ id: value.id, quantity: 1 });
+        }
+        if (items.length > 0) {
+            router.post(route('cart.bulkAdd'), { items }, { 
+                preserveScroll: true, 
+                preserveState: true,
+                only: ['cart']
+            });
+        }
+    };
 
     const saveConfig = () => {
         if (!auth.user) {
@@ -362,7 +491,7 @@ export default function Index({ auth }) {
                     className="glass-card-premium p-8 rounded-3xl"
                 >
                     <div className="text-center mb-10">
-                        <div className="inline-flex p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 mb-4 border border-indigo-500/20">
+                        <div className="inline-flex p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 mb-4 border border-emerald-500/20">
                             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={categories[0].icon} /></svg>
                         </div>
                         <h2 className="text-3xl font-black text-white tracking-tight mb-2 uppercase italic">Configurador de PC Zend</h2>
@@ -373,7 +502,7 @@ export default function Index({ auth }) {
                         {[
                             { id: 'AM5', name: 'AMD Ryzen AM5', desc: 'Zen 4/5, DDR5, PCIe 5.0', color: 'from-orange-500/20 to-red-500/10', border: 'hover:border-orange-500/50', accent: 'text-orange-400' },
                             { id: 'AM4', name: 'AMD Ryzen AM4', desc: 'Zen 3, DDR4, Máxima Eficiencia', color: 'from-emerald-500/20 to-teal-500/10', border: 'hover:border-emerald-500/50', accent: 'text-emerald-400' },
-                            { id: 'LGA 1700', name: 'Intel LGA 1700', desc: 'Gen 12-14, Híbrida, DDR4/DDR5', color: 'from-blue-500/20 to-indigo-500/10', border: 'hover:border-blue-500/50', accent: 'text-blue-400' }
+                            { id: 'LGA 1700', name: 'Intel LGA 1700', desc: 'Gen 12-14, Híbrida, DDR4/DDR5', color: 'from-blue-500/20 to-emerald-500/10', border: 'hover:border-blue-500/50', accent: 'text-blue-400' }
                         ].map(p => (
                             <button 
                                 key={p.id}
@@ -401,11 +530,11 @@ export default function Index({ auth }) {
                     {/* Integrated Header */}
                     <div className="glass-card-premium p-4 rounded-2xl mb-6 border border-white/5 flex flex-col md:flex-row items-center justify-between gap-4 flex-shrink-0">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_20px_rgba(52, 211, 153,,0.1)]">
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={categories.find(c => c.slug === activeCategory)?.icon} /></svg>
                             </div>
                             <div>
-                                <div className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.2em] mb-0.5">Piezas Sugeridas</div>
+                                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] mb-0.5">Piezas Sugeridas</div>
                                 <h2 className="text-xl font-black text-white uppercase tracking-tight italic">
                                     {categories.find(c => c.slug === activeCategory)?.name}
                                 </h2>
@@ -422,7 +551,7 @@ export default function Index({ auth }) {
                                     placeholder="Modelo o marca..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-dark-bg/50 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all outline-none"
+                                    className="w-full bg-dark-bg/50 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-bold text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 transition-all outline-none"
                                 />
                             </div>
                             <button onClick={() => setShowMobileFilters(true)} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition-colors">
@@ -435,7 +564,7 @@ export default function Index({ auth }) {
                     <div className="flex-1 relative min-h-0">
                         {isLoading ? (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-12 h-12 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                                <div className="w-12 h-12 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
                             </div>
                         ) : (
                             <div className="absolute inset-0 overflow-y-auto pr-2 styled-scrollbar pb-10">
@@ -448,7 +577,7 @@ export default function Index({ auth }) {
                                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             transition={{ duration: 0.4, ease: "easeOut", delay: Math.min(idx * 0.05, 0.5) }}
-                                            className="glass-card-premium group relative overflow-hidden p-5 rounded-2xl border border-white/5 hover:border-indigo-500/40 transition-all duration-500 flex flex-col md:flex-row gap-6 hover:shadow-[0_0_40px_rgba(99,102,241,0.05)]"
+                                            className="glass-card-premium group relative overflow-hidden p-5 rounded-2xl border border-white/5 hover:border-emerald-500/40 transition-all duration-500 flex flex-col md:flex-row gap-6 hover:shadow-[0_0_40px_rgba(52, 211, 153,,0.05)]"
                                         >
                                             <div className="w-full md:w-44 h-44 shrink-0 bg-white rounded-xl p-4 flex items-center justify-center overflow-hidden relative transition-all duration-500">
                                                 {product.image ? (
@@ -464,7 +593,7 @@ export default function Index({ auth }) {
                                             <div className="flex-grow flex flex-col min-w-0">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="min-w-0">
-                                                        <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-indigo-300 transition-colors truncate tracking-tight uppercase italic">{product.name}</h4>
+                                                        <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-emerald-300 transition-colors truncate tracking-tight uppercase italic">{product.name}</h4>
                                                         <div className="flex flex-wrap gap-2 mb-4">
                                                             {product.specs && Object.entries(product.specs).slice(0, 4).map(([k, v]) => (
                                                                 <span key={k} className="status-pill text-slate-500 bg-white/5 border border-white/5">
@@ -474,7 +603,7 @@ export default function Index({ auth }) {
                                                         </div>
                                                     </div>
                                                     <div className="text-right shrink-0">
-                                                        <div className="text-3xl font-black text-white tracking-widest">{Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-indigo-400 text-lg ml-1">€</span></div>
+                                                        <div className="text-3xl font-black text-white tracking-widest">{Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-emerald-400 text-lg ml-1">€</span></div>
                                                         <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">Pieza Verificada</div>
                                                     </div>
                                                 </div>
@@ -489,7 +618,7 @@ export default function Index({ auth }) {
                                                             const isMax = getSyncLevel(product) === 3;
                                                             const isActive = getSyncLevel(product) >= level;
                                                             return (
-                                                                <div key={level} className={`w-1.5 h-1.5 rounded-full ${isActive ? (isMax ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]') : 'bg-white/10'}`}></div>
+                                                                <div key={level} className={`w-1.5 h-1.5 rounded-full ${isActive ? (isMax ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(52, 211, 153,,0.8)]') : 'bg-white/10'}`}></div>
                                                             );
                                                         })}
                                                         <span className={`text-[8px] font-black uppercase tracking-widest ml-2 ${getSyncLevel(product) === 3 ? 'text-emerald-500' : 'text-slate-600'}`}>
@@ -498,7 +627,7 @@ export default function Index({ auth }) {
                                                     </div>
                                                     <button 
                                                         onClick={() => selectProduct(activeCategory, product)}
-                                                        className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl action-glow transition-all active:scale-95"
+                                                        className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl action-glow transition-all active:scale-95"
                                                     >
                                                         Añadir Selección
                                                     </button>
@@ -532,15 +661,23 @@ export default function Index({ auth }) {
                             </div>
                             <h2 className="text-4xl font-black text-white uppercase tracking-tight italic mb-3">Piezas Listas</h2>
                             <p className="text-slate-400 max-w-md mx-auto mb-10 text-sm font-medium">Todos los componentes han sido revisados. El equipo está equilibrado y listo para montar.</p>
-                            <div className="flex gap-4 justify-center">
-                                <button 
-                                    onClick={saveConfig}
-                                    disabled={!compatibility.valid}
-                                    className={`px-10 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl action-glow transition-all active:scale-95 ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
-                                >
-                                    Guardar Configuración
-                                </button>
-                            </div>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6 w-full max-w-xl mx-auto">
+                            <button 
+                                onClick={saveConfig}
+                                disabled={!compatibility.valid}
+                                className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl action-glow transition-all active:scale-95 text-xs ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                            >
+                                Guardar Manifiesto
+                            </button>
+                            <button 
+                                onClick={addConfigToCart}
+                                disabled={!compatibility.valid}
+                                className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl border border-emerald-500/50 shadow-[0_0_20px_rgba(16, 185, 129,,0.3)] transition-all active:scale-95 text-xs flex items-center justify-center gap-2 ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                Añadir a la Cesta
+                            </button>
+                        </div>
                         </div>
                     </motion.div>
                 ) : (
@@ -558,9 +695,9 @@ export default function Index({ auth }) {
     return (
         <>
             <Head title="ZendBuilder | Premium PC Configurator" />
-            <div className="min-h-screen lg:h-screen bg-[#080a11] text-slate-200 selection:bg-indigo-500/30 overflow-x-hidden lg:overflow-hidden flex flex-col">
+            <div className="min-h-screen lg:h-screen bg-[#080a11] text-slate-200 selection:bg-emerald-500/30 overflow-x-hidden lg:overflow-hidden flex flex-col">
                 {/* Global Aura */}
-                <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+                <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-600/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
                 
                 {/* Navbar Refinada */}
                 <nav className="glass-nav border-b-white/5 border-b-[0.5px]">
@@ -574,7 +711,7 @@ export default function Index({ auth }) {
                                     <Link href={route('catalog.index')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
                                         Catálogo
                                     </Link>
-                                    <Link href={route('builder.index')} className="text-white border-b-2 border-indigo-500 pb-1 text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                    <Link href={route('builder.index')} className="text-white border-b-2 border-emerald-500 pb-1 text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
                                         Configurador
                                     </Link>
                                     <Link href={route('dashboard')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
@@ -590,9 +727,9 @@ export default function Index({ auth }) {
                                             <button className="flex items-center gap-4 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.07] transition-all group focus:outline-none">
                                                 <div className="text-right hidden sm:block">
                                                     <div className="text-[11px] font-black text-white uppercase tracking-tight leading-none mb-1">{auth.user.name}</div>
-                                                    <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Panel Usuario</div>
+                                                    <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Panel Usuario</div>
                                                 </div>
-                                                <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black border border-indigo-500/10 shadow-inner">
+                                                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-black border border-emerald-500/10 shadow-inner">
                                                     {auth.user.name.charAt(0).toUpperCase()}
                                                 </div>
                                             </button>
@@ -600,16 +737,16 @@ export default function Index({ auth }) {
                                         <Dropdown.Content contentClasses="py-1 bg-[#0f121d] border border-white/5 rounded-xl shadow-2xl mt-2">
                                             {auth.user.role === 'admin' && (
                                                 <>
-                                                    <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                    <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
                                                         Admin Categorías
                                                     </Dropdown.Link>
-                                                    <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                                    <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
                                                         Admin Productos
                                                     </Dropdown.Link>
                                                     <div className="border-t border-white/5 my-1"></div>
                                                 </>
                                             )}
-                                            <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-indigo-500/20 hover:text-indigo-400 text-sm font-medium">
+                                            <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
                                                 Perfil de Usuario
                                             </Dropdown.Link>
                                             <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 text-sm font-medium w-full text-left">
@@ -636,7 +773,7 @@ export default function Index({ auth }) {
                                 <div className="flex items-center justify-between mb-10 px-2">
                                     <div className="hud-label tracking-[0.3em]">Progreso del Montaje</div>
                                     <div className="flex items-center gap-2.5">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)] animate-pulse"></div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.8)] animate-pulse"></div>
                                         <span className="text-[11px] font-black text-white italic tracking-tighter">{Math.round(progressPercentage)}%</span>
                                     </div>
                                 </div>
@@ -654,17 +791,17 @@ export default function Index({ auth }) {
                                                 key={cat.slug} 
                                                 disabled={isDisabled}
                                                 onClick={() => isSocket && isSelected ? setShowPlatformConfirm(true) : handleCategoryClick(cat.slug)}
-                                                className={`group w-full text-left p-4 rounded-3xl border transition-all duration-500 relative ${isDisabled ? 'opacity-20 cursor-not-allowed grayscale border-transparent' : 'cursor-pointer'} ${isActive ? 'bg-indigo-500/[0.07] border-indigo-500/50 shadow-[inset_0_0_20px_rgba(99,102,241,0.05)]' : isSelected ? 'bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40' : 'bg-white/[0.01] border-white/[0.03] hover:border-white/20'}`}
+                                                className={`group w-full text-left p-4 rounded-3xl border transition-all duration-500 relative ${isDisabled ? 'opacity-20 cursor-not-allowed grayscale border-transparent' : 'cursor-pointer'} ${isActive ? 'bg-emerald-500/[0.07] border-emerald-500/50 shadow-[inset_0_0_20px_rgba(52, 211, 153,,0.05)]' : isSelected ? 'bg-emerald-500/[0.03] border-emerald-500/20 hover:border-emerald-500/40' : 'bg-white/[0.01] border-white/[0.03] hover:border-white/20'}`}
                                             >
-                                                {isActive && <div className="absolute inset-0 bg-indigo-500/[0.03] rounded-3xl" />}
+                                                {isActive && <div className="absolute inset-0 bg-emerald-500/[0.03] rounded-3xl" />}
                                                 
                                                 <div className="flex items-center justify-between gap-4 relative z-10">
                                                     <div className="flex items-center gap-4 min-w-0">
-                                                        <div className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-700 flex items-center justify-center ${isActive ? 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.5)] scale-110' : isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
+                                                        <div className={`shrink-0 w-9 h-9 rounded-xl transition-all duration-700 flex items-center justify-center ${isActive ? 'bg-emerald-600 text-white shadow-[0_0_20px_rgba(16, 185, 129,,0.5)] scale-110' : isSelected ? 'bg-emerald-500/20 text-emerald-400' : 'bg-white/5 text-slate-600'}`}>
                                                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? 2.5 : 2} d={cat.icon} /></svg>
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <span className={`block text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isActive ? 'text-indigo-400' : isSelected ? 'text-emerald-400' : 'text-slate-500'}`}>{cat.name}</span>
+                                                            <span className={`block text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isActive ? 'text-emerald-400' : isSelected ? 'text-emerald-400' : 'text-slate-500'}`}>{cat.name}</span>
                                                             {isSelected ? (
                                                                 <span className="block text-[11px] font-black text-white truncate max-w-full italic tracking-tight">
                                                                     {isSocket ? selectedPlatform : config[cat.slug].name}
@@ -774,7 +911,7 @@ export default function Index({ auth }) {
                                         </div>
                                     ) : (
                                         <div className="py-16 text-center">
-                                            <div className="w-12 h-12 border-2 border-white/5 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                            <div className="w-12 h-12 border-2 border-white/5 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
                                             <p className="text-[10px] font-black text-slate-700 uppercase tracking-[0.3em] italic">Esperando hardware...</p>
                                         </div>
                                     )}
@@ -787,19 +924,19 @@ export default function Index({ auth }) {
                                             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
                                             className="glass-card-premium overflow-hidden rounded-[2.5rem] group relative border border-white/5 shadow-2xl"
                                         >
-                                            <div className="bg-gradient-to-r from-indigo-600/10 to-purple-600/10 p-7 border-b border-white/5 flex items-center justify-between">
+                                            <div className="bg-gradient-to-r from-emerald-600/10 to-purple-600/10 p-7 border-b border-white/5 flex items-center justify-between">
                                                 <div>
-                                                    <div className="hud-label tracking-[0.3em] text-indigo-400 mb-1">Rendimiento en Juegos</div>
+                                                    <div className="hud-label tracking-[0.3em] text-emerald-400 mb-1">Rendimiento en Juegos</div>
                                                     <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Base de datos v4.2</div>
                                                 </div>
                                                 <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform">
-                                                    <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
+                                                    <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
                                                 </div>
                                             </div>
                                             <div className="p-8 space-y-6">
                                                 {[
                                                     { label: 'Competitivo (1080p)', val: performance.competitive, max: 400, color: 'from-emerald-400' },
-                                                    { label: 'Triple A (1440p)', val: performance.aaa, max: 165, color: 'from-indigo-400' },
+                                                    { label: 'Triple A (1440p)', val: performance.aaa, max: 165, color: 'from-emerald-400' },
                                                     { label: 'Ultra (4K)', val: performance.ultra, max: 100, color: 'from-purple-400' }
                                                 ].map((t, idx) => (
                                                     <div key={idx}>
@@ -849,25 +986,42 @@ export default function Index({ auth }) {
                                     <span className="text-[10px] font-black text-white italic">{Math.round(progressPercentage)}%</span>
                                 </div>
                                 <div className="h-2 bg-white/[0.03] rounded-full overflow-hidden p-0.5 border border-white/5 ring-1 ring-white/5">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }} transition={{ duration: 2 }} className="h-full bg-gradient-to-r from-indigo-700 via-indigo-400 to-white rounded-full shadow-[0_0_15px_rgba(99,102,241,0.7)]" />
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${progressPercentage}%` }} transition={{ duration: 2 }} className="h-full bg-gradient-to-r from-emerald-700 via-emerald-400 to-white rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.7)]" />
                                 </div>
                             </div>
                             <div className="flex flex-col">
                                 <span className="hud-label text-[9px] mb-1 block tracking-[0.2em] opacity-40">Valoración del Proyecto</span>
                                 <div className="text-3xl font-black text-white tracking-widest leading-none italic">
-                                    {Number(calculateTotal()).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-xl text-indigo-600 ml-1">€</span>
+                                    {Number(calculateTotal()).toLocaleString('es-ES', { minimumFractionDigits: 2 })}<span className="text-xl text-emerald-600 ml-1">€</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-4 w-full md:w-auto">
-                            <button 
-                                onClick={saveConfig}
-                                className={`flex-grow md:flex-none px-10 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 active:scale-95 ${(!compatibility.valid || progressPercentage === 0) ? 'bg-white/5 text-slate-700 cursor-not-allowed border border-white/5 opacity-50 grayscale' : 'bg-indigo-600 hover:bg-white hover:text-indigo-900 border-indigo-600 shadow-[0_0_30px_rgba(99,102,241,0.4)] cursor-pointer'}`}
-                                disabled={!compatibility.valid || progressPercentage === 0}
-                            >
-                                {progressPercentage === 100 ? 'Finalizar Construcción' : 'Sincronizar Manifiesto'}
-                            </button>
+                            {progressPercentage === 100 ? (
+                                <>
+                                    <button 
+                                        onClick={saveConfig}
+                                        className="flex-1 md:flex-none px-6 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)] action-glow"
+                                    >
+                                        Guardar
+                                    </button>
+                                    <button 
+                                        onClick={addConfigToCart}
+                                        className="flex-1 md:flex-none px-6 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 bg-emerald-600 hover:bg-white hover:text-emerald-900 border border-emerald-500/50 shadow-[0_0_30px_rgba(52, 211, 153,,0.4)] flex items-center gap-2 justify-center"
+                                    >
+                                        <svg className="w-4 h-4 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        Comprar PC
+                                    </button>
+                                </>
+                            ) : (
+                                <button 
+                                    className="px-10 py-3 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 bg-white/5 text-slate-700 cursor-not-allowed border border-white/5 opacity-50 grayscale"
+                                    disabled
+                                >
+                                    Sincronizar Manifiesto
+                                </button>
+                            )}
                         </div>
                     </motion.div>
                 </div>
@@ -875,39 +1029,124 @@ export default function Index({ auth }) {
 
             {/* Filter Modal */}
             <Modal show={showMobileFilters} onClose={() => setShowMobileFilters(false)} maxWidth="md">
-                <div className="glass-card-premium p-8 border border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <div className="flex justify-between items-center mb-6 relative z-10">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                <div className="glass-card-premium border border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
+                    <div className="p-8 border-b border-white/10 relative z-10 shrink-0">
+                        <div className="flex justify-between items-center relative z-10">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                                </div>
+                                <h3 className="text-xl font-black text-white uppercase italic tracking-tight">Filtros Activos</h3>
                             </div>
-                            <h3 className="text-xl font-black text-white uppercase italic tracking-tight">Filtros Activos</h3>
+                            <button onClick={() => setShowMobileFilters(false)} className="text-slate-500 hover:text-white transition-colors">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>
                         </div>
-                        <button onClick={() => setShowMobileFilters(false)} className="text-slate-500 hover:text-white transition-colors">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
                     </div>
                     
-                    <div className="space-y-8 relative z-10">
-                        <div>
-                            <div className="flex justify-between items-end mb-3">
-                                <label className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Presupuesto Máximo</label>
-                                <div className="text-lg font-black text-white italic">{priceRange.max} <span className="text-indigo-400 text-sm">€</span></div>
+                    <div className="p-8 space-y-8 overflow-y-auto styled-scrollbar relative z-10 flex-1">
+                        <div className="mb-8">
+                            <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-4">Rango de Precios</label>
+                            <div className="flex justify-between items-center text-[11px] font-black text-white italic mb-6 px-2">
+                                <EditablePrice 
+                                    value={priceRange.min} 
+                                    onChange={val => setPriceRange({...priceRange, min: Math.min(val, priceRange.max - 1)})} 
+                                    min={0} 
+                                    max={priceRange.max - 1} 
+                                />
+                                <EditablePrice 
+                                    value={priceRange.max} 
+                                    onChange={val => setPriceRange({...priceRange, max: Math.max(val, priceRange.min + 1)})} 
+                                    min={priceRange.min + 1} 
+                                    max={2500} 
+                                />
                             </div>
-                            <input 
-                                type="range" 
-                                min="0" 
-                                max="2500" 
-                                step="50"
-                                value={priceRange.max}
-                                onChange={(e) => setPriceRange({...priceRange, max: parseInt(e.target.value)})}
-                                className="w-full accent-indigo-500 h-2 bg-white/5 rounded-lg appearance-none cursor-pointer"
-                            />
+                            <div className="relative h-2 bg-white/5 rounded-full mb-2 flex items-center group/slider">
+                                <input 
+                                    type="range" 
+                                    min={0} 
+                                    max={2500} 
+                                    step="10"
+                                    value={priceRange.min}
+                                    onChange={(e) => setPriceRange({...priceRange, min: Math.min(parseInt(e.target.value), priceRange.max - 10)})}
+                                    className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg z-30"
+                                />
+                                <input 
+                                    type="range" 
+                                    min={0} 
+                                    max={2500} 
+                                    step="10"
+                                    value={priceRange.max}
+                                    onChange={(e) => setPriceRange({...priceRange, max: Math.max(priceRange.min + 10, parseInt(e.target.value))})}
+                                    className="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-lg z-30"
+                                />
+                                <div 
+                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.5)] z-20"
+                                    style={{ 
+                                        left: `calc(${Math.max(0, Math.min(100, (priceRange.min / 2500) * 100))}% + ${10 - Math.max(0, Math.min(100, (priceRange.min / 2500) * 100)) * 0.2}px)`,
+                                        right: `calc(${100 - Math.max(0, Math.min(100, (priceRange.max / 2500) * 100))}% + ${10 - (100 - Math.max(0, Math.min(100, (priceRange.max / 2500) * 100))) * 0.2}px)` 
+                                    }}
+                                ></div>
+                            </div>
                         </div>
+
+                        {/* Specification Filters from Catalog */}
+                        {availableFilters && availableFilters.length > 0 && availableFilters.map((group) => (
+                            <div key={group.key} className="glass-panel rounded-2xl border border-white/5 overflow-hidden">
+                                <button 
+                                    onClick={() => toggleGroup(group.key)}
+                                    className="w-full p-4 flex items-center justify-between group/btn outline-none bg-white/[0.02]"
+                                >
+                                    <h3 className="font-black text-white uppercase tracking-[0.2em] text-[9px] items-center gap-2 flex text-left">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
+                                        {group.name}
+                                    </h3>
+                                    <div className={`transition-transform duration-300 text-slate-500 group-hover/btn:text-white shrink-0 ${expandedGroups.includes(group.key) ? 'rotate-180' : ''}`}>
+                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </button>
+
+                                <AnimatePresence initial={false}>
+                                    {expandedGroups.includes(group.key) && (
+                                        <motion.div 
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                        >
+                                            <div className="px-4 pb-4 pt-1 bg-white/[0.01]">
+                                                <div className="space-y-3">
+                                                    {group.options.map((opt) => (
+                                                        <label 
+                                                            key={opt}
+                                                            className="flex items-center gap-3 cursor-pointer group/label"
+                                                        >
+                                                            <div className="relative w-4 h-4 shrink-0">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    className="peer hidden"
+                                                                    checked={selectedSpecs[group.key]?.includes(opt)}
+                                                                    onChange={() => handleSpecToggle(group.key, opt)}
+                                                                />
+                                                                <div className="w-4 h-4 rounded-md border-2 border-white/10 bg-white/[0.02] peer-checked:bg-emerald-600 peer-checked:border-emerald-600 transition-all group-hover/label:border-emerald-500/50"></div>
+                                                                <svg className="absolute inset-0 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity p-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                                            </div>
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest transition-colors break-words overflow-hidden ${selectedSpecs[group.key]?.includes(opt) ? 'text-white' : 'text-slate-500 group-hover/label:text-slate-300'}`}>
+                                                                {opt}
+                                                            </span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ))}
                     </div>
 
-                    <div className="mt-10 relative z-10">
-                        <button onClick={() => setShowMobileFilters(false)} className="w-full px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_30px_rgba(99,102,241,0.3)] transition-all active:scale-95">
+                    <div className="p-6 border-t border-white/10 relative z-10 shrink-0 bg-[#0a0d16]">
+                        <button onClick={() => setShowMobileFilters(false)} className="w-full px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_30px_rgba(52, 211, 153,,0.3)] transition-all active:scale-95">
                             Aplicar Preferencias
                         </button>
                     </div>

@@ -87,7 +87,10 @@ class CatalogController extends Controller
                     'capacity' => 'Capacidad / Almacenamiento',
                     'interface' => 'Conexión / Interfaz',
                     'type' => 'Tipo de Unidad',
-                    'speed' => 'Velocidad'
+                    'speed' => 'Velocidad',
+                    'series' => 'Gama / Serie',
+                    'integrated_graphics' => 'Gráficos Integrados',
+                    'architecture' => 'Arquitectura'
                 ];
                 
                 foreach($filterGroups as $key => $values) {

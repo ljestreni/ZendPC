@@ -4,6 +4,59 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 
+const EditablePrice = ({ value, onChange, min, max }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [localValue, setLocalValue] = useState(value);
+    
+    useEffect(() => setLocalValue(value), [value]);
+
+    if (isEditing) {
+        return (
+            <div className="relative inline-flex items-center">
+                <input 
+                    type="number" 
+                    autoFocus
+                    className="bg-white/[0.05] border border-emerald-500/50 rounded-lg pl-2 pr-5 py-0.5 w-[65px] text-[11px] font-black text-white italic outline-none focus:ring-1 focus:ring-emerald-500/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    value={localValue}
+                    onChange={e => {
+                        const val = e.target.value;
+                        if (val === '' || Number(val) >= 0) setLocalValue(val);
+                    }}
+                    onBlur={() => {
+                        setIsEditing(false);
+                        let val = parseInt(localValue);
+                        if (isNaN(val)) val = min;
+                        val = Math.max(min, Math.min(max, val));
+                        onChange(val);
+                    }}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') e.target.blur();
+                        if (e.key === 'ArrowUp') { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) + 10)); }
+                        if (e.key === 'ArrowDown') { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) - 10)); }
+                    }}
+                />
+                <div className="absolute right-0.5 inset-y-0 flex flex-col justify-center py-0.5">
+                    <button type="button" tabIndex="-1" onMouseDown={e => { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) + 10)); }} className="text-slate-500 hover:text-emerald-400 h-1/2 flex items-end pb-px justify-center px-1">
+                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 15l7-7 7 7" /></svg>
+                    </button>
+                    <button type="button" tabIndex="-1" onMouseDown={e => { e.preventDefault(); setLocalValue(prev => Math.max(0, (parseInt(prev) || 0) - 10)); }} className="text-slate-500 hover:text-emerald-400 h-1/2 flex items-start pt-px justify-center px-1">
+                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <span 
+            className="cursor-text hover:text-emerald-400 transition-colors border-b border-transparent hover:border-emerald-400/50 pb-[1px]" 
+            onClick={() => setIsEditing(true)}
+            title="Click para editar"
+        >
+            {value}€
+        </span>
+    );
+};
+
 export default function Index({ auth, productos, categorias, filters, availableFilters, priceRange }) {
     const [minPrice, setMinPrice] = useState(filters.min_price || priceRange.min);
     const [maxPrice, setMaxPrice] = useState(filters.max_price || priceRange.max);
@@ -114,7 +167,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
                             className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase text-white mb-2"
                         >
-                            Catálogo de <span className="text-indigo-500">Componentes</span>
+                            Catálogo de <span className="text-emerald-500">Componentes</span>
                         </motion.h1>
                         <motion.p
                             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
@@ -131,9 +184,9 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                 placeholder="Buscar componente..."
                                 defaultValue={filters.search}
                                 onChange={(e) => applyFilters({ ...filters, search: e.target.value })}
-                                className="bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-indigo-600/50 w-64 transition-all"
+                                className="bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/50 w-64 transition-all"
                             />
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-indigo-400 transition-colors">
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-emerald-400 transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
                          </div>
@@ -157,7 +210,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                     <button 
                                         key={`${key}-${val}`} 
                                         onClick={() => removeSpecFilter(key, val)}
-                                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-600/10 border border-indigo-600/30 text-[9px] font-black uppercase tracking-widest text-indigo-400 hover:bg-indigo-600/20 transition-all"
+                                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-600/10 border border-emerald-600/30 text-[9px] font-black uppercase tracking-widest text-emerald-400 hover:bg-emerald-600/20 transition-all"
                                     >
                                         {formatValue(key, val)} <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                                     </button>
@@ -188,7 +241,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                 className="w-full p-6 lg:p-8 flex items-center justify-between group/btn outline-none"
                             >
                                 <h3 className="font-black text-white uppercase tracking-[0.3em] text-[10px] items-center gap-3 flex">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.8)]"></div>
                                     CATEGORÍAS
                                 </h3>
                                 <div className={`transition-transform duration-300 text-slate-500 group-hover/btn:text-white ${expandedGroups.includes('categories') ? 'rotate-180' : ''}`}>
@@ -207,7 +260,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                         <div className="px-6 lg:px-8 pb-8 space-y-2">
                                             <Link
                                                 href={route('catalog.index')}
-                                                className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${!filters.category ? 'bg-indigo-600 text-white shadow-[0_0_30px_rgba(79,70,229,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
+                                                className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${!filters.category ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
                                             >
                                                 <div className="relative z-10">Todas las Unidades</div>
                                                 <div className="absolute right-4 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
@@ -218,7 +271,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                 <Link
                                                     key={cat.id}
                                                     href={route('catalog.index', { category: cat.slug })}
-                                                    className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${filters.category === cat.slug ? 'bg-indigo-600 text-white shadow-[0_0_30px_rgba(79,70,229,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
+                                                    className={`w-full flex items-center px-5 py-3.5 rounded-2xl transition-all duration-500 text-[10px] font-black uppercase tracking-widest group relative overflow-hidden ${filters.category === cat.slug ? 'bg-emerald-600 text-white shadow-[0_0_30px_rgba(16, 185, 129,,0.3)]' : 'bg-white/[0.01] border border-white/5 text-slate-500 hover:bg-white/[0.05] hover:text-white hover:border-white/20'}`}
                                                 >
                                                     <div className="relative z-10 flex items-center gap-3 text-left">
                                                         {cat.name}
@@ -258,11 +311,21 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                         transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                                     >
                                         <div className="px-6 lg:px-8 pb-8">
-                                            <div className="flex justify-between text-[11px] font-black text-white italic mb-6 px-2">
-                                                <span>{minPrice}€</span>
-                                                <span>{maxPrice}€</span>
+                                            <div className="flex justify-between items-center text-[11px] font-black text-white italic mb-6 px-2">
+                                                <EditablePrice 
+                                                    value={minPrice} 
+                                                    onChange={val => handlePriceChange(Math.min(val, maxPrice - 1), maxPrice)} 
+                                                    min={priceRange.min} 
+                                                    max={maxPrice - 1} 
+                                                />
+                                                <EditablePrice 
+                                                    value={maxPrice} 
+                                                    onChange={val => handlePriceChange(minPrice, Math.max(val, minPrice + 1))} 
+                                                    min={minPrice + 1} 
+                                                    max={priceRange.max} 
+                                                />
                                             </div>
-                                            <div className="relative h-2 bg-white/5 rounded-full mb-8 flex items-center group/slider px-2">
+                                            <div className="relative h-2 bg-white/5 rounded-full mb-8 flex items-center group/slider">
                                                 <input 
                                                     type="range" 
                                                     min={priceRange.min} 
@@ -288,10 +351,10 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                     style={{ zIndex: maxPrice < (priceRange.max / 2) ? 35 : 34 }}
                                                 />
                                                 <div 
-                                                    className="absolute h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)] z-20"
+                                                    className="absolute h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-full shadow-[0_0_15px_rgba(52, 211, 153,,0.5)] z-20"
                                                     style={{ 
-                                                        left: `${Math.max(0, Math.min(100, ((minPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}%`,
-                                                        width: `${Math.max(0, Math.min(100, ((maxPrice - minPrice) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}%` 
+                                                        left: `calc(${Math.max(0, Math.min(100, ((minPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}% + ${10 - Math.max(0, Math.min(100, ((minPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100)) * 0.2}px)`,
+                                                        right: `calc(${100 - Math.max(0, Math.min(100, ((maxPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))}% + ${10 - (100 - Math.max(0, Math.min(100, ((maxPrice - priceRange.min) / (Math.max(1, priceRange.max - priceRange.min))) * 100))) * 0.2}px)` 
                                                     }}
                                                 ></div>
                                             </div>
@@ -340,7 +403,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                                     checked={selectedSpecs[group.key]?.includes(opt)}
                                                                     onChange={() => handleSpecToggle(group.key, opt)}
                                                                 />
-                                                                <div className="w-4 h-4 rounded-md border-2 border-white/10 bg-white/[0.02] peer-checked:bg-indigo-600 peer-checked:border-indigo-600 transition-all group-hover/label:border-indigo-500/50"></div>
+                                                                <div className="w-4 h-4 rounded-md border-2 border-white/10 bg-white/[0.02] peer-checked:bg-emerald-600 peer-checked:border-emerald-600 transition-all group-hover/label:border-emerald-500/50"></div>
                                                                 <svg className="absolute inset-0 w-4 h-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity p-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                                             </div>
                                                             <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${selectedSpecs[group.key]?.includes(opt) ? 'text-white' : 'text-slate-500 group-hover/label:text-slate-300'}`}>
@@ -361,8 +424,8 @@ export default function Index({ auth, productos, categorias, filters, availableF
                     <div className="flex-1">
                         {isFiltering && (
                              <div className="flex items-center gap-3 mb-6 animate-pulse">
-                                <div className="w-4 h-4 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-                                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">Buscando piezas...</span>
+                                <div className="w-4 h-4 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">Buscando piezas...</span>
                              </div>
                         )}
                         
@@ -387,39 +450,56 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                 hidden: { y: 20, opacity: 0 },
                                                 visible: { y: 0, opacity: 1 }
                                             }}
-                                            className="glass-card-premium rounded-[2rem] flex flex-col group border border-white/5 hover:border-indigo-500/30 transition-all duration-500 overflow-hidden"
+                                            className="glass-card-premium rounded-[2rem] flex flex-col group border border-white/5 hover:border-emerald-500/30 transition-all duration-500 overflow-hidden"
                                         >
-                                            <Link href={route('catalog.show', product.slug)} className="p-1 px-1 flex flex-col flex-grow group">
-                                                <div className="relative w-full h-56 bg-white rounded-[1.5rem] flex items-center justify-center p-8 overflow-hidden border border-white/10 transition-colors uppercase">
-                                                    {product.image ? (
-                                                        <img src={product.image} alt="" className="relative z-10 max-w-full max-h-full object-contain transform group-hover:scale-110 group-hover:-rotate-2 transition-transform duration-700" />
-                                                    ) : (
-                                                        <div className="text-slate-200 font-black uppercase tracking-[0.2em] text-[10px] italic">Sin Señal</div>
-                                                    )}
-                                                </div>
-
-                                                <div className="p-6 flex-grow flex flex-col">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <div className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em]">
-                                                            {product.category ? product.category.name : 'Hardware'}
-                                                        </div>
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                            <div className="flex flex-col flex-grow">
+                                                <Link href={route('catalog.show', product.slug)} className="p-1 px-1 flex flex-col group">
+                                                    <div className="relative w-full h-56 bg-white rounded-[1.5rem] flex items-center justify-center p-8 overflow-hidden border border-white/10 transition-colors uppercase">
+                                                        {product.image ? (
+                                                            <img src={product.image} alt="" className="relative z-10 max-w-full max-h-full object-contain transform group-hover:scale-110 group-hover:-rotate-2 transition-transform duration-700" />
+                                                        ) : (
+                                                            <div className="text-slate-200 font-black uppercase tracking-[0.2em] text-[10px] italic">Sin Señal</div>
+                                                        )}
                                                     </div>
-                                                    <h4 className="font-black text-base text-white line-clamp-2 leading-tight group-hover:text-indigo-300 transition-colors uppercase italic tracking-tight mb-6">{product.name}</h4>
 
-                                                    <div className="mt-auto pt-6 flex items-end justify-between border-t border-white/5">
+                                                    <div className="p-6 pb-0">
+                                                        <div className="flex items-center justify-between mb-4">
+                                                            <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">
+                                                                {product.category ? product.category.name : 'Hardware'}
+                                                            </div>
+                                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
+                                                        </div>
+                                                        <h4 className="font-black text-base text-white line-clamp-2 leading-tight group-hover:text-emerald-300 transition-colors uppercase italic tracking-tight mb-6">{product.name}</h4>
+                                                    </div>
+                                                </Link>
+
+                                                <div className="p-6 pt-0 mt-auto">
+                                                    <div className="pt-6 flex items-end justify-between border-t border-white/5">
                                                         <div>
                                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">PRECIO</span>
                                                             <p className="text-2xl font-black text-white tracking-tighter italic">
-                                                                {Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-indigo-500 text-sm">€</span>
+                                                                {Number(product.price).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} <span className="text-emerald-500 text-sm">€</span>
                                                             </p>
                                                         </div>
-                                                        <div className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
-                                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                                        </div>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                router.post(route('cart.add'), { product_id: product.id }, { 
+                                                                    preserveScroll: true, 
+                                                                    preserveState: true,
+                                                                    only: ['cart']
+                                                                });
+                                                            }}
+                                                            title="Añadir a la cesta"
+                                                            className="w-10 h-10 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center hover:bg-emerald-600 transition-all active:scale-90 group/btn"
+                                                        >
+                                                            <svg className="w-4 h-4 text-white group-hover/btn:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </div>
-                                            </Link>
+                                            </div>
                                         </motion.div>
                                     ))
                                 ) : (
@@ -429,7 +509,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                         </div>
                                         <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">No se han encontrado unidades</h3>
                                         <p className="text-slate-500 max-w-sm mx-auto uppercase tracking-widest text-[10px] font-black">Ajusta tus parámetros de búsqueda o limpia los filtros para reintentar la sincronización.</p>
-                                        <button onClick={clearFilters} className="mt-10 px-8 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-indigo-600 hover:border-indigo-500 transition-all">Limpiar Analítica</button>
+                                        <button onClick={clearFilters} className="mt-10 px-8 py-3 bg-white/[0.03] border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-emerald-600 hover:border-emerald-500 transition-all">Limpiar Analítica</button>
                                     </div>
                                 )}
                             </AnimatePresence>

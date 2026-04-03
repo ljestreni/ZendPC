@@ -82,7 +82,7 @@ export default function Index({ auth, productos }) {
                                         <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
                                             <Link
                                                 href={route("admin.products.edit", product.id)}
-                                                className="inline-flex items-center gap-1 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                                                className="inline-flex items-center gap-1 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
                                             >
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                 <span className="hidden xl:inline">Editar</span>

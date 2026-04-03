@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 
 import { 
@@ -306,13 +306,13 @@ export default function Show({ auth, producto }) {
             header={
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 uppercase italic">
                     <div className="flex items-center gap-4 text-[10px] font-black tracking-[0.3em] text-slate-500 leading-none">
-                        <Link href={route('catalog.index')} className="hover:text-indigo-400 transition-colors">Hardware</Link>
+                        <Link href={route('catalog.index')} className="hover:text-emerald-400 transition-colors">Hardware</Link>
                         <ChevronRightIcon className="w-3 h-3 text-slate-600" />
                         <span className="text-white">{producto.category?.name || 'Recursos'}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
-                        <ShieldCheckIcon className="w-3.5 h-3.5 text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-                        <span className="text-[9px] font-black text-indigo-400 tracking-widest lowercase">protocolo de verificación industrial activo</span>
+                        <ShieldCheckIcon className="w-3.5 h-3.5 text-emerald-500 drop-shadow-[0_0_8px_rgba(52, 211, 153,,0.8)]" />
+                        <span className="text-[9px] font-black text-emerald-400 tracking-widest lowercase">protocolo de verificación industrial activo</span>
                     </div>
                 </div>
             }
@@ -332,7 +332,7 @@ export default function Show({ auth, producto }) {
                                 className="glass-card-premium rounded-[3rem] p-4 lg:p-6 flex flex-col items-center justify-center min-h-[500px] lg:min-h-[600px] relative overflow-hidden border border-white/5 shadow-[inset_0_0_100px_rgba(255,255,255,0.02)]"
                             >
                                 {/* Mesh Gradient Accent */}
-                                <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none"></div>
+                                <div className="absolute -top-24 -left-24 w-64 h-64 bg-emerald-600/20 blur-[100px] rounded-full pointer-events-none"></div>
                                 <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-emerald-600/10 blur-[100px] rounded-full pointer-events-none"></div>
 
                                 {producto.image ? (
@@ -369,7 +369,7 @@ export default function Show({ auth, producto }) {
                             >
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="px-5 py-2 rounded-full bg-white/[0.05] border border-white/10 flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                                         <span className="text-[9px] font-black text-white uppercase tracking-widest">{producto.category?.name || 'Recurso'}</span>
                                     </div>
                                     {perfScore > 0 && (
@@ -389,7 +389,7 @@ export default function Show({ auth, producto }) {
                                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Valor de Mercado</span>
                                         <div className="text-4xl lg:text-5xl font-black text-white italic tracking-tighter flex items-start gap-1">
                                             {Number(producto.price).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                            <span className="text-indigo-500 text-xl uppercase mt-1">€</span>
+                                            <span className="text-emerald-500 text-xl uppercase mt-1">€</span>
                                         </div>
                                     </div>
                                     <div className="flex-grow"></div>
@@ -418,7 +418,7 @@ export default function Show({ auth, producto }) {
                                             {activeTab === tab.id && (
                                                 <motion.div 
                                                     layoutId="active-pill"
-                                                    className="absolute inset-0 bg-indigo-600 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.4)]"
+                                                    className="absolute inset-0 bg-emerald-600 rounded-xl shadow-[0_0_20px_rgba(16, 185, 129,,0.4)]"
                                                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                                 />
                                             )}
@@ -447,13 +447,13 @@ export default function Show({ auth, producto }) {
                                             {perfScore > 0 && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     {[
-                                                        { label: 'RENDIMIENTO_JUEGOS', val: perfScore, color: 'bg-indigo-500' },
+                                                        { label: 'RENDIMIENTO_JUEGOS', val: perfScore, color: 'bg-emerald-500' },
                                                         { label: 'PRODUCTIVIDAD', val: Math.max(1, perfScore - 5), color: 'bg-emerald-500' }
                                                     ].map((hud, idx) => (
                                                         <div key={idx} className="bg-black/30 border border-white/5 rounded-xl p-4 relative overflow-hidden group">
                                                             <div className="flex justify-between items-center mb-2">
                                                                 <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest italic">{hud.label}</span>
-                                                                <span className={`text-base font-black italic ${idx === 0 ? 'text-indigo-400' : 'text-emerald-400'}`}>{hud.val}%</span>
+                                                                <span className={`text-base font-black italic ${idx === 0 ? 'text-emerald-400' : 'text-emerald-400'}`}>{hud.val}%</span>
                                                             </div>
                                                             <div className="flex gap-0.5 h-1.5">
                                                                 {Array.from({ length: 20 }).map((_, i) => (
@@ -469,7 +469,7 @@ export default function Show({ auth, producto }) {
                                                 </div>
                                             )}
 
-                                            <p className="text-slate-400 text-[11px] lg:text-xs leading-[1.6] font-medium italic border-l-2 border-indigo-500/50 pl-6 py-1">
+                                            <p className="text-slate-400 text-[11px] lg:text-xs leading-[1.6] font-medium italic border-l-2 border-emerald-500/50 pl-6 py-1">
                                                 {description}
                                             </p>
                                         </motion.div>
@@ -484,8 +484,8 @@ export default function Show({ auth, producto }) {
                                                             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all group relative overflow-hidden">
                                                                 <div className="absolute inset-0 dot-grid-pattern-slate opacity-10"></div>
                                                                 <div className="relative z-10 flex items-center gap-4 w-full">
-                                                                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 group-hover:scale-110 transition-transform">
-                                                                        <block.icon className="w-5 h-5 text-indigo-500" />
+                                                                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                                                                        <block.icon className="w-5 h-5 text-emerald-500" />
                                                                     </div>
                                                                     <div className="min-w-0">
                                                                         <h4 className="text-white font-black uppercase text-[10px] tracking-widest mb-1 italic truncate">{block.title}</h4>
@@ -495,16 +495,16 @@ export default function Show({ auth, producto }) {
                                                             </div>
                                                         ))}
                                                     </div>
-                                                    <div className="bg-indigo-500/5 p-6 rounded-2xl border border-indigo-500/10">
+                                                    <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10">
                                                         <p className="text-slate-300 text-[11px] leading-[1.8] text-justify italic font-medium">
                                                             {insight.longDescription}
                                                         </p>
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="p-12 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 text-center relative overflow-hidden">
+                                                <div className="p-12 rounded-[2rem] bg-emerald-500/5 border border-emerald-500/10 text-center relative overflow-hidden">
                                                     <div className="absolute inset-0 dot-grid-pattern-slate"></div>
-                                                    <InformationCircleIcon className="w-10 h-10 text-indigo-500/30 mx-auto mb-4" />
+                                                    <InformationCircleIcon className="w-10 h-10 text-emerald-500/30 mx-auto mb-4" />
                                                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Arquitectura no registrada.</p>
                                                 </div>
                                             )}
@@ -519,7 +519,7 @@ export default function Show({ auth, producto }) {
                                                         <div className="absolute inset-0 dot-grid-pattern-slate opacity-10"></div>
                                                         <div className="relative z-10">
                                                             <div className="flex items-center gap-3 mb-4 border-b border-white/5 pb-3">
-                                                                <group.icon className="w-4 h-4 text-indigo-500" />
+                                                                <group.icon className="w-4 h-4 text-emerald-500" />
                                                                 <h5 className="text-[9px] font-black text-white uppercase tracking-widest italic">{group.name}</h5>
                                                             </div>
                                                             <div className="space-y-2">
@@ -542,13 +542,13 @@ export default function Show({ auth, producto }) {
                                                 <div className="absolute inset-0 dot-grid-pattern-slate opacity-10"></div>
                                                 <ArchiveBoxIcon className="absolute -right-8 -bottom-8 w-48 h-48 text-white/[0.02] -rotate-12" />
                                                 <h4 className="text-white font-black uppercase text-[9px] tracking-[0.4em] mb-8 flex items-center gap-4 pb-4 border-b border-white/5">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(52, 211, 153,,0.5)]"></div>
                                                     Manifiesto de Contenido
                                                 </h4>
                                                 <ul className="space-y-4 relative z-10">
                                                     {(insight?.inTheBox || ['Unidad Principal', 'Documentación', 'Garantía']).map((item, i) => (
                                                         <li key={i} className="flex items-center gap-4 group/item">
-                                                            <div className="w-4 h-[1px] bg-indigo-500/30 group-hover/item:w-6 transition-all"></div>
+                                                            <div className="w-4 h-[1px] bg-emerald-500/30 group-hover/item:w-6 transition-all"></div>
                                                             <span className="text-[11px] font-black text-slate-500 italic tracking-wide group-hover/item:text-slate-300 transition-colors">{item}</span>
                                                         </li>
                                                     ))}
@@ -558,11 +558,24 @@ export default function Show({ auth, producto }) {
                                     )}
                                 </div>
 
-                                <div className="pt-8 border-t border-white/10 mt-8">
-                                    <Link href={route('builder.index')} className="group relative w-full flex items-center justify-center px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-indigo-500 hover:-translate-y-1 active:translate-y-0 text-xs italic shadow-[0_15px_40px_rgba(79,70,229,0.25)]">
+                                <div className="pt-8 border-t border-white/10 mt-8 flex flex-col gap-3">
+                                    <button 
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            router.post(route('cart.add'), { product_id: producto.id }, { 
+                                                preserveScroll: true, 
+                                                preserveState: true,
+                                                only: ['cart']
+                                            });
+                                        }}
+                                        className="group relative w-full flex items-center justify-center px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-emerald-500 hover:-translate-y-1 active:translate-y-0 text-xs italic shadow-[0_15px_40px_rgba(16, 185, 129,,0.25)]"
+                                    >
                                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-in-out"></div>
-                                        <span className="relative z-10">Integrar en Configuración</span>
-                                    </Link>
+                                        <span className="relative z-10 flex items-center gap-3">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                            Añadir a la Cesta
+                                        </span>
+                                    </button>
                                 </div>
                             </motion.div>
                         </div>
@@ -574,8 +587,8 @@ export default function Show({ auth, producto }) {
                             <div className="text-4xl font-black italic">ZND_QC</div>
                         </div>
                         <div className="flex items-center gap-4 mb-6">
-                            <ShieldCheckIcon className="w-6 h-6 text-indigo-500" />
-                            <span className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] italic">cláusula de integridad térmica y estructural</span>
+                            <ShieldCheckIcon className="w-6 h-6 text-emerald-500" />
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">cláusula de integridad térmica y estructural</span>
                         </div>
                         <p className="text-[10px] uppercase font-black text-slate-600 tracking-widest leading-[2.2] text-justify max-w-2xl">
                             La información presentada en este manifiesto ha sido extraída mediante protocolos de detección directa y validada por el equipo de ingeniería de ZendPC. Cada componente es verificado contra bases de datos globales para asegurar que cumple con el estándar de rendimiento industrial exigido. Las arquitecturas citadas reflejan el diseño del núcleo del hardware original. La telemetría puede variar ±2% según condiciones ambientales.
@@ -586,7 +599,7 @@ export default function Show({ auth, producto }) {
             </div>
             
             {/* Background HUD Decor */}
-            <div className="fixed bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-indigo-900/10 to-transparent pointer-events-none -z-10"></div>
+            <div className="fixed bottom-0 left-0 w-full h-[500px] bg-gradient-to-t from-emerald-900/10 to-transparent pointer-events-none -z-10"></div>
             <div className="fixed top-0 right-0 p-12 opacity-[0.02] pointer-events-none -z-10">
                 <div className="text-[200px] font-black italic tracking-tighter leading-none">ZND</div>
             </div>

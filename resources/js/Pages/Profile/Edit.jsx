@@ -30,7 +30,7 @@ export default function Edit({ mustVerifyEmail, status, hasPassword }) {
                     </div>
 
                     <div className="glass-panel p-6 sm:rounded-3xl sm:p-10 border border-dark-border overflow-hidden relative">
-                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full"></div>
+                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full"></div>
                         <UpdatePasswordForm hasPassword={hasPassword} className="max-w-xl relative z-10" />
                     </div>
 

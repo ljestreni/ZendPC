@@ -62,10 +62,10 @@
         border-radius: 10px;
     }
     .styled-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: #3730a3;
+        background-color: #065f46;
     }
     .glass-card-premium {
-        @apply bg-[#1a1d2e]/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+        @apply bg-[#0c0e18]/80 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
     }
     
     .glass-border {
@@ -81,10 +81,10 @@
     }
 
     .action-glow {
-        @apply shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-all duration-300;
+        @apply shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_30px_rgba(52,211,153,0.5)] transition-all duration-300;
     }
 
     .step-indicator-active {
-        @apply relative before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1 before:bg-indigo-500 before:rounded-full shadow-[inset_4px_0_12px_rgba(99,102,241,0.1)];
+        @apply relative before:absolute before:left-0 before:top-1/4 before:h-1/2 before:w-1 before:bg-emerald-500 before:rounded-full shadow-[inset_4px_0_12px_rgba(52,211,153,0.1)];
     }
 }

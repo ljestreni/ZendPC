@@ -108,11 +108,18 @@ class ZendBuilderController extends Controller
                       ->orWhere('specs->socket', 'like', '%' . $platform . '%');
                 });
             } elseif ($categorySlug === 'ram') {
-                // Filtramos la RAM según lo admitido por el Socket
-                if ($platform === 'AM4') {
-                    $query->where('specs->type', 'DDR4');
-                } elseif ($platform === 'AM5') {
-                    $query->where('specs->type', 'DDR5');
+                // Filtramos la RAM según lo admitido por la Placa Base seleccionada o el Socket
+                if ($request->has('motherboard')) {
+                    $mb = Product::find($request->input('motherboard'));
+                    if ($mb && is_array($mb->specs) && isset($mb->specs['memory_type'])) {
+                        $query->where('specs->type', $mb->specs['memory_type']);
+                    }
+                } else {
+                    if ($platform === 'AM4') {
+                        $query->where('specs->type', 'DDR4');
+                    } elseif ($platform === 'AM5') {
+                        $query->where('specs->type', 'DDR5');
+                    }
                 }
             }
         }
