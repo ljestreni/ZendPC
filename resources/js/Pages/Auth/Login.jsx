@@ -26,7 +26,7 @@ export default function Login({ status, canResetPassword }) {
             <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-zend-600/20 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] pointer-events-none"></div>
             
-            <Head title="Iniciar Sesión - ZendPC" />
+            <Head title="Iniciar Sesión" />
 
             <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 flex flex-col items-center">
                 <Link href="/" className="flex items-center gap-3">

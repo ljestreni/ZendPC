@@ -375,7 +375,7 @@ export default function Show({ auth, producto }) {
                 </div>
             }
         >
-            <Head title={producto.name + " - ZendPC"} />
+            <Head title={producto.name} />
             
             <div className="py-8 lg:py-16 relative z-10">
                 <div className="max-w-[1400px] mx-auto px-6 relative z-10">
@@ -451,12 +451,14 @@ export default function Show({ auth, producto }) {
                                         </div>
                                     </div>
                                     <div className="flex-grow"></div>
-                                    <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 h-fit self-end mb-1">
+                                    <div className={`flex items-center gap-4 px-6 py-3 rounded-2xl h-fit self-end mb-1 border transition-colors ${producto.stock > 0 ? 'bg-emerald-500/5 border-emerald-500/10' : 'bg-red-500/5 border-red-500/10'}`}>
                                          <div className="relative">
-                                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                                            <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                                            <div className={`w-2.5 h-2.5 rounded-full ${producto.stock > 0 ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+                                            {producto.stock > 0 && <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>}
                                          </div>
-                                         <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] italic">Stock Disponible</span>
+                                         <span className={`text-[10px] font-black uppercase tracking-[0.2em] italic ${producto.stock > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {producto.stock > 0 ? 'Stock Disponible' : 'Sin Stock'}
+                                         </span>
                                     </div>
                                 </div>
 
@@ -618,6 +620,7 @@ export default function Show({ auth, producto }) {
 
                                 <div className="pt-8 border-t border-white/10 mt-8 flex flex-col gap-3">
                                     <button 
+                                        disabled={producto.stock <= 0}
                                         onClick={(e) => {
                                             e.preventDefault();
                                             router.post(route('cart.add'), { product_id: producto.id }, { 
@@ -626,12 +629,16 @@ export default function Show({ auth, producto }) {
                                                 only: ['cart']
                                             });
                                         }}
-                                        className="group relative w-full flex items-center justify-center px-10 py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all hover:bg-emerald-500 hover:-translate-y-1 active:translate-y-0 text-xs italic shadow-[0_15px_40px_rgba(16, 185, 129,0.25)]"
+                                        className={`group relative w-full flex items-center justify-center px-10 py-5 rounded-2xl font-black uppercase tracking-[0.2em] overflow-hidden transition-all text-xs italic ${
+                                            producto.stock > 0 
+                                            ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:-translate-y-1 active:translate-y-0 shadow-[0_15px_40px_rgba(16, 185, 129,0.25)]' 
+                                            : 'bg-white/5 text-slate-500 cursor-not-allowed opacity-50 border border-white/10'
+                                        }`}
                                     >
-                                        <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-in-out"></div>
+                                        {producto.stock > 0 && <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-in-out"></div>}
                                         <span className="relative z-10 flex items-center gap-3">
                                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                            Añadir a la Cesta
+                                            {producto.stock > 0 ? 'Añadir a la Cesta' : 'Agotado'}
                                         </span>
                                     </button>
                                 </div>

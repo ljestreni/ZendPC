@@ -206,7 +206,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                 </div>
             }
         >
-            <Head title="Catálogo - ZendPC" />
+            <Head title="Catálogo" />
 
             <div className="py-12 relative z-10">
                 {/* Active Filters Bar */}

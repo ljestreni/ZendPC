@@ -162,6 +162,17 @@ class CatalogController extends Controller
      */
     public function show(Product $product)
     {
+        // Registrar historial de visita
+        $recent = session()->get('recent_products', []);
+        
+        // Remover si existe, para moverlo al frente
+        $recent = array_diff($recent, [$product->id]);
+        array_unshift($recent, $product->id);
+        
+        // Limitar a 8 productos recientes
+        $recent = array_slice($recent, 0, 8);
+        session()->put('recent_products', $recent);
+
         $product->load('category');
         $producto = $product;
         return Inertia::render('Catalog/Show', compact('producto'));

@@ -49,27 +49,30 @@ export default function DeleteUserForm({ className = '', hasPassword }) {
     return (
         <section className={`space-y-6 ${className}`}>
             <header>
-                <h2 className="text-xl font-bold text-white">
-                    Eliminar Cuenta
+                <h2 className="text-xl font-black text-red-500 italic uppercase tracking-tighter">
+                    Secuencia de Autodestrucción
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Una vez que se elimine tu cuenta, todos sus recursos y datos se borrarán de forma permanente. 
                     Antes de eliminar tu cuenta, por favor descarga cualquier dato o información que desees conservar.
                 </p>
             </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Eliminar Mi Cuenta
-            </DangerButton>
+            <button 
+                onClick={confirmUserDeletion}
+                className="px-6 py-3 bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:border-red-500 text-red-500 hover:text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all text-[10px] italic"
+            >
+                Eliminar Mi Cuenta Permanentemente
+            </button>
 
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-2xl font-bold text-white mb-4">
-                        ¿Estás seguro de que deseas eliminar tu cuenta?
+                    <h2 className="text-2xl font-black text-white mb-4 italic uppercase tracking-tighter">
+                        ¿Estás seguro de que deseas desactivar tu <span className="text-red-500">Núcleo</span>?
                     </h2>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
                         Una vez que se elimine tu cuenta, todos sus recursos y datos se borrarán de forma permanente. 
                         {hasPassword && ' Por favor, introduce tu contraseña para confirmar que deseas eliminar permanentemente tu cuenta.'}
                     </p>
@@ -78,7 +81,7 @@ export default function DeleteUserForm({ className = '', hasPassword }) {
                         <div className="mt-6">
                             <InputLabel
                                 htmlFor="password"
-                                value="Password"
+                                value="Contraseña"
                                 className="sr-only"
                             />
 
@@ -93,7 +96,7 @@ export default function DeleteUserForm({ className = '', hasPassword }) {
                                 }
                                 className="mt-1 block w-3/4"
                                 isFocused
-                                placeholder="Password"
+                                placeholder="Contraseña"
                             />
 
                             <InputError
@@ -124,16 +127,21 @@ export default function DeleteUserForm({ className = '', hasPassword }) {
                         </div>
                     )}
 
-                    <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton onClick={closeModal}>
-                            Cancelar
-                        </SecondaryButton>
+                    <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-white/5">
+                        <button 
+                            type="button"
+                            onClick={closeModal}
+                            className="px-6 py-3 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all italic border border-white/5"
+                        >
+                            Abortar
+                        </button>
 
-                        <DangerButton 
+                        <button 
                             disabled={processing || (!hasPassword && data.confirmation_text !== 'ELIMINAR')}
+                            className="px-6 py-3 bg-red-600 text-white hover:bg-red-500 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all disabled:opacity-50 italic shadow-[0_0_20px_rgba(220,38,38,0.4)]"
                         >
                             Confirmar Eliminación
-                        </DangerButton>
+                        </button>
                     </div>
                 </form>
             </Modal>

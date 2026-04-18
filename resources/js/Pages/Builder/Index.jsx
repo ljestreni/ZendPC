@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import Modal from '@/Components/Modal';
@@ -59,7 +59,7 @@ const EditablePrice = ({ value, onChange, min, max }) => {
     );
 };
 
-export default function Index({ auth }) {
+export default function Index({ auth, initialConfig }) {
     const [showingMobileMenu, setShowingMobileMenu] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
@@ -84,10 +84,26 @@ export default function Index({ auth }) {
         }
     }, [isMobile]);
 
-    const [selectedPlatform, setSelectedPlatform] = useState(null);
-    const [config, setConfig] = useState({
-        cpu: null, motherboard: null, ram: null, gpu: null,
-        storage: null, psu: null, case: null, cooler: null
+    const [selectedPlatform, setSelectedPlatform] = useState(() => {
+        if (initialConfig?.configuration?.cpu?.specs?.socket) {
+            const sock = initialConfig.configuration.cpu.specs.socket;
+            if (sock.includes('AM5')) return 'AM5';
+            if (sock.includes('AM4')) return 'AM4';
+            if (sock.includes('1700')) return 'LGA 1700';
+            return sock;
+        }
+        return null;
+    });
+
+    const [config, setConfig] = useState(() => {
+        const base = {
+            cpu: null, motherboard: null, ram: null, gpu: null,
+            storage: null, psu: null, case: null, cooler: null
+        };
+        if (initialConfig?.configuration) {
+            return { ...base, ...initialConfig.configuration };
+        }
+        return base;
     });
 
     const [activeCategory, setActiveCategory] = useState('socket');
@@ -111,6 +127,12 @@ export default function Index({ auth }) {
         setPriceRange({ min: 0, max: 2500 });
         setSelectedSpecs({});
     }, [activeCategory]);
+
+    useEffect(() => {
+        if (initialConfig) {
+            validateConfig(config);
+        }
+    }, []);
 
     const availableFilters = useMemo(() => {
         if (!products || products.length === 0) return [];
@@ -338,7 +360,8 @@ export default function Index({ auth }) {
             max_cooler_height: 'Altura Máx. CPU',
             height: 'Altura',
             max_gpu_length: 'Largo Máx. GPU',
-            perf_score: 'Puntuación Rendimiento'
+            perf_score: 'Puntuación Rendimiento',
+            radiator_support: 'Radiadores'
         };
         return dictionary[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     };
@@ -467,31 +490,42 @@ export default function Index({ auth }) {
             router.post(route('cart.bulkAdd'), { items }, { 
                 preserveScroll: true, 
                 preserveState: true,
-                only: ['cart']
+                onSuccess: () => alert("¡Configuración añadida al carrito!")
             });
         }
     };
 
-    const saveConfig = () => {
+    const saveConfig = (asNew = false) => {
         if (!auth.user) {
              window.location.href = route('login');
              return;
         }
         if (!compatibility.valid) return alert("Corrige los problemas de compatibilidad antes de guardar.");
         
-        const name = prompt("Introduce un nombre para tu nuevo proyecto:");
-        if (!name) return;
+        let name = initialConfig?.name;
+        if (asNew || !initialConfig) {
+            name = prompt("Introduce un nombre para tu proyecto:", name || "");
+            if (!name) return;
+        }
 
         const components = {};
         for (const [key, value] of Object.entries(config)) {
              if (value) components[key] = value.id;
         }
 
-        axios.post(route('builder.save'), {
-             name, components, total_price: calculateTotal()
-        }).then(() => {
-             window.location.href = route('dashboard');
-        }).catch(() => alert("Error al guardar el proyecto."));
+        const payload = {
+             name, configuration: components, total_price: parseFloat(calculateTotal())
+        };
+
+        if (initialConfig && !asNew) {
+            axios.put(route('saved-configs.update', initialConfig.id), payload)
+                .then(() => window.location.href = route('dashboard'))
+                .catch(() => alert("Error al actualizar el proyecto."));
+        } else {
+            axios.post(route('builder.save'), payload)
+                .then(() => window.location.href = route('dashboard'))
+                .catch(() => alert("Error al guardar el proyecto."));
+        }
     };
 
     const rightPanelContent = (
@@ -607,11 +641,34 @@ export default function Index({ auth }) {
                                                     <div className="min-w-0">
                                                         <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-emerald-300 transition-colors truncate tracking-tight uppercase italic">{product.name}</h4>
                                                         <div className="flex flex-wrap gap-2 mb-4">
-                                                            {product.specs && Object.entries(product.specs).slice(0, 4).map(([k, v]) => (
-                                                                <span key={k} className="status-pill text-slate-500 bg-white/5 border border-white/5">
-                                                                    {formatSpecKey(k)}: <span className="text-slate-300">{formatSpecValue(k, v)}</span>
-                                                                </span>
-                                                            ))}
+                                                            {product.specs && (() => {
+                                                                let specs = Object.entries(product.specs);
+                                                                let highlightKey = null;
+                                                                
+                                                                if (activeCategory === 'case' && config.cooler) {
+                                                                    const isAio = config.cooler.specs?.type === 'AIO';
+                                                                    if (isAio) {
+                                                                        highlightKey = 'radiator_support';
+                                                                        specs = specs.filter(([k]) => k !== 'max_cooler_height');
+                                                                        const rad = specs.find(([k]) => k === highlightKey);
+                                                                        if (rad) specs = [rad, ...specs.filter(([k]) => k !== highlightKey)];
+                                                                    } else {
+                                                                        highlightKey = 'max_cooler_height';
+                                                                        specs = specs.filter(([k]) => k !== 'radiator_support');
+                                                                        const height = specs.find(([k]) => k === highlightKey);
+                                                                        if (height) specs = [height, ...specs.filter(([k]) => k !== highlightKey)];
+                                                                    }
+                                                                }
+                                                                
+                                                                return specs.slice(0, 4).map(([k, v]) => {
+                                                                    const isHighlighted = k === highlightKey;
+                                                                    return (
+                                                                        <span key={k} className={`status-pill ${isHighlighted ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-slate-500 bg-white/5 border-white/5'}`}>
+                                                                            {formatSpecKey(k)}: <span className={isHighlighted ? 'text-emerald-300 font-bold' : 'text-slate-300'}>{formatSpecValue(k, v)}</span>
+                                                                        </span>
+                                                                    );
+                                                                });
+                                                            })()}
                                                         </div>
                                                     </div>
                                                     <div className="text-right shrink-0">
@@ -674,13 +731,32 @@ export default function Index({ auth }) {
                             <h2 className="text-4xl font-black text-white uppercase tracking-tight italic mb-3">Piezas Listas</h2>
                             <p className="text-slate-400 max-w-md mx-auto mb-10 text-sm font-medium">Todos los componentes han sido revisados. El equipo está equilibrado y listo para montar.</p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6 w-full max-w-xl mx-auto">
-                            <button 
-                                onClick={saveConfig}
-                                disabled={!compatibility.valid}
-                                className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl action-glow transition-all active:scale-95 text-xs ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
-                            >
-                                Guardar Manifiesto
-                            </button>
+                            {initialConfig ? (
+                                <div className="flex-1 flex flex-col gap-2">
+                                    <button 
+                                        onClick={() => saveConfig(false)}
+                                        disabled={!compatibility.valid}
+                                        className={`w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-xl action-glow transition-all active:scale-95 text-[10px] ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                                    >
+                                        Sobrescribir Manifiesto
+                                    </button>
+                                    <button 
+                                        onClick={() => saveConfig(true)}
+                                        disabled={!compatibility.valid}
+                                        className={`w-full py-2.5 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-400 font-black uppercase tracking-[0.2em] rounded-xl transition-all active:scale-95 text-[10px] ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                                    >
+                                        Guardar Como Nuevo
+                                    </button>
+                                </div>
+                            ) : (
+                                <button 
+                                    onClick={() => saveConfig(false)}
+                                    disabled={!compatibility.valid}
+                                    className={`flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-[0.2em] rounded-2xl action-glow transition-all active:scale-95 text-xs ${!compatibility.valid && 'opacity-50 grayscale cursor-not-allowed'}`}
+                                >
+                                    Guardar Manifiesto
+                                </button>
+                            )}
                             <button 
                                 onClick={addConfigToCart}
                                 disabled={!compatibility.valid}
@@ -706,7 +782,7 @@ export default function Index({ auth }) {
 
     return (
         <>
-            <Head title="ZendBuilder | Premium PC Configurator" />
+            <Head title="Configurador" />
             <div className="min-h-screen lg:h-screen bg-[#080a11] text-slate-200 selection:bg-emerald-500/30 overflow-x-hidden lg:overflow-hidden flex flex-col">
                 {/* Global Aura */}
                 <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-600/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
@@ -720,6 +796,9 @@ export default function Index({ auth }) {
                                     <ApplicationLogo className="h-10 md:h-12 w-auto group-hover:scale-105 transition-transform duration-500 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
                                 </Link>
                                 <div className="hidden lg:flex ml-20 items-center gap-12">
+                                    <Link href={route('home')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                        Inicio
+                                    </Link>
                                     <Link href={route('catalog.index')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
                                         Catálogo
                                     </Link>

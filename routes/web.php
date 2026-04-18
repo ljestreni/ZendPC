@@ -7,9 +7,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\CatalogController;
 
-Route::get('/', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/', [StorefrontController::class, 'index'])->name('home');
+Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
 Route::get('/product/{product:slug}', [CatalogController::class, 'show'])->name('catalog.show');
 
 use App\Http\Controllers\ZendBuilderController;
@@ -21,7 +23,17 @@ Route::post('/builder/validate', [ZendBuilderController::class, 'validateSelecti
 Route::post('/builder/save', [ZendBuilderController::class, 'save'])->name('builder.save')->middleware('auth');
 Route::get('/builder/products/{categorySlug}', [ZendBuilderController::class, 'getProducts'])->name('builder.products');
 
+use App\Http\Controllers\SavedConfigController;
+Route::middleware('auth')->prefix('saved-configs')->name('saved-configs.')->group(function () {
+    Route::get('/{savedConfig}/edit', [SavedConfigController::class, 'edit'])->name('edit');
+    Route::put('/{savedConfig}', [SavedConfigController::class, 'update'])->name('update');
+    Route::delete('/{savedConfig}', [SavedConfigController::class, 'destroy'])->name('destroy');
+    Route::post('/{savedConfig}/move-to-cart', [SavedConfigController::class, 'moveToCart'])->name('moveToCart');
+});
+
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+
 Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/add', [CartController::class, 'add'])->name('add');
     Route::post('/remove', [CartController::class, 'remove'])->name('remove');
@@ -29,13 +41,24 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::post('/bulk-add', [CartController::class, 'bulkAdd'])->name('bulkAdd');
     Route::post('/clear', [CartController::class, 'clear'])->name('clear');
 });
+
+Route::get('/cart', function () {
+    return redirect()->route('catalog.index');
+});
+
 Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/orders/{order}/cancel', [\App\Http\Controllers\OrderController::class, 'cancel'])->name('orders.cancel');
     Route::get('/export/config/{savedConfig}/pdf', [ExportController::class, 'exportConfigPdf'])->name('export.config.pdf');
 });
 
 Route::get('/dashboard', function () {
-    $configuracionesGuardadas = request()->user()->savedConfigs()->latest()->get();
-    return Inertia::render('Dashboard', compact('configuracionesGuardadas'));
+    $user = request()->user();
+    $configuracionesGuardadas = $user->savedConfigs()->latest()->get();
+    $pedidos = $user->orders()->with('items.product')->latest()->get();
+    
+    return Inertia::render('Dashboard', compact('configuracionesGuardadas', 'pedidos'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -44,9 +67,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('products', ProductController::class);
+    
+    Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.updateStatus');
 });
 
 require __DIR__.'/auth.php';

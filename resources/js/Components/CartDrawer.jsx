@@ -50,7 +50,8 @@ export default function CartDrawer({ isOpen, onClose }) {
     };
 
     const checkout = () => {
-        alert("¡Próximamente! El sistema de pasarela de pago está en desarrollo.");
+        onClose();
+        router.get(route('checkout.index'));
     };
 
     return (
@@ -97,8 +98,8 @@ export default function CartDrawer({ isOpen, onClose }) {
                             ) : (
                                 cart.items.map((item) => (
                                     <div key={item.id} className="flex gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-emerald-500/30 transition-colors group">
-                                        <div className="w-20 h-20 rounded-xl bg-white/5 p-2 flex-shrink-0 flex items-center justify-center">
-                                            <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain drop-shadow-xl" />
+                                        <div className="w-20 h-20 rounded-xl bg-white p-2 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                                            <img src={item.image} alt={item.name} className="max-w-full max-h-full object-contain mix-blend-multiply drop-shadow-sm" />
                                         </div>
                                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                                             <div>

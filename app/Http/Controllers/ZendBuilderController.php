@@ -137,13 +137,13 @@ class ZendBuilderController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'components' => 'required|array',
+            'configuration' => 'required|array',
             'total_price' => 'required|numeric',
         ]);
 
         $request->user()->savedConfigs()->create([
             'name' => $request->name,
-            'components' => $request->components,
+            'configuration' => $request->configuration,
             'total_price' => $request->total_price,
         ]);
 

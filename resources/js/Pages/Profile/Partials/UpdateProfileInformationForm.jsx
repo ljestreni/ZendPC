@@ -27,11 +27,11 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">
                     Información del Perfil
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Actualiza la información de tu cuenta y tu dirección de correo electrónico.
                 </p>
             </header>
@@ -71,29 +71,33 @@ export default function UpdateProfileInformation({
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
-                        <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
-                            Your email address is unverified.
+                        <p className="mt-2 text-sm text-slate-400">
+                            Tu dirección de correo no está verificada.
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                                className="ml-2 rounded-md font-bold text-emerald-500 underline hover:text-emerald-400 focus:outline-none"
                             >
-                                Click here to re-send the verification email.
+                                Haz clic aquí para reenviar el email de verificación.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                                A new verification link has been sent to your
-                                email address.
+                            <div className="mt-2 text-sm font-medium text-emerald-400 bg-emerald-400/10 p-3 rounded-lg border border-emerald-500/20">
+                                Se ha enviado un nuevo enlace de verificación a tu dirección de correo.
                             </div>
                         )}
                     </div>
                 )}
 
-                <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Guardar Cambios</PrimaryButton>
+                <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                    <button 
+                        disabled={processing}
+                        className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(16, 185, 129,0.3)] transition-all disabled:opacity-50 text-[10px] italic"
+                    >
+                        Guardar Cambios
+                    </button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -102,8 +106,8 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-emerald-400 font-medium">
-                            Guardado Correctamente.
+                        <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                            Transmitido
                         </p>
                     </Transition>
                 </div>

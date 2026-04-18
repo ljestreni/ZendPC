@@ -24,6 +24,10 @@ export default function Modal({
         lg: 'sm:max-w-lg',
         xl: 'sm:max-w-xl',
         '2xl': 'sm:max-w-2xl',
+        '3xl': 'sm:max-w-3xl',
+        '4xl': 'sm:max-w-4xl',
+        '5xl': 'sm:max-w-5xl',
+        '6xl': 'sm:max-w-6xl',
     }[maxWidth];
 
     return (
@@ -42,7 +46,7 @@ export default function Modal({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="absolute inset-0 bg-dark-bg/80 backdrop-blur-sm" />
+                    <div className="fixed inset-0 bg-dark-bg/80 backdrop-blur-md" />
                 </TransitionChild>
 
                 <TransitionChild

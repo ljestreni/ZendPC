@@ -47,12 +47,12 @@ export default function UpdatePasswordForm({ className = '', hasPassword }) {
     return (
         <section className={className}>
             <header>
-                <h2 className="text-xl font-bold text-white">
-                    {hasPassword ? 'Actualizar Contraseña' : 'Establecer Contraseña'}
+                <h2 className="text-xl font-black text-white italic uppercase tracking-tighter">
+                    {hasPassword ? 'Credenciales de Acceso' : 'Establecer Credenciales'}
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-400">
-                    Asegúrate de que tu cuenta esté utilizando una contraseña larga y aleatoria para mantener la seguridad.
+                <p className="mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                    Asegúrate de que tu cuenta esté utilizando una contraseña larga y aleatoria generada estocásticamente para mantener la integridad del sistema.
                 </p>
             </header>
 
@@ -122,10 +122,13 @@ export default function UpdatePasswordForm({ className = '', hasPassword }) {
                     />
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>
-                        {hasPassword ? 'Actualizar Contraseña' : 'Guardar Contraseña'}
-                    </PrimaryButton>
+                <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+                    <button 
+                        disabled={processing}
+                        className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(16, 185, 129,0.3)] transition-all disabled:opacity-50 text-[10px] italic"
+                    >
+                        {hasPassword ? 'Actualizar Credenciales' : 'Guardar Credenciales'}
+                    </button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -134,8 +137,8 @@ export default function UpdatePasswordForm({ className = '', hasPassword }) {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-emerald-400 font-medium">
-                            Actualizada.
+                        <p className="text-[10px] text-emerald-400 font-black uppercase tracking-widest bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                            Firmwares Actualizados
                         </p>
                     </Transition>
                 </div>

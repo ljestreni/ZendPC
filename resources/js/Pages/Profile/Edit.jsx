@@ -16,7 +16,7 @@ export default function Edit({ mustVerifyEmail, status, hasPassword }) {
                 </div>
             }
         >
-            <Head title="Perfil - ZendPC" />
+            <Head title="Perfil" />
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
