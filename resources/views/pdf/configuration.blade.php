@@ -213,7 +213,7 @@
         </div>
 
         <div class="footer">
-            <strong>ZENDPC CORPORATION</strong> &bull; Industrial Engineering Unit &bull; www.zendpc.com &bull;
+            <strong>ZENDPC CORPORATION</strong> &bull; Industrial Engineering Unit &bull;
             <span style="color: rgba(16,185,129,0.5); text-transform: uppercase; letter-spacing: 1px;">Approved Build v1.0</span><br>
             Este documento representa una previsión de recursos técnicos y costes verificada por el núcleo ZendBuilder.
         </div>

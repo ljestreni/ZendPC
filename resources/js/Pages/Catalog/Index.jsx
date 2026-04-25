@@ -170,6 +170,8 @@ export default function Index({ auth, productos, categorias, filters, availableF
         return `${val}${unit ? ' ' + unit : ''}`;
     };
 
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
+
     return (
         <AuthenticatedLayout
             header={
@@ -190,18 +192,24 @@ export default function Index({ auth, productos, categorias, filters, availableF
                     </div>
 
                     <div className="flex items-center gap-4">
-                         <div className="relative group">
+                         <div className="relative group flex-1 md:flex-none">
                             <input 
                                 type="text" 
                                 placeholder="Buscar componente..."
                                 defaultValue={filters.search}
                                 onChange={(e) => applyFilters({ ...filters, search: e.target.value })}
-                                className="bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/50 w-64 transition-all"
+                                className="bg-white/[0.03] border border-white/5 rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-emerald-600/50 w-full md:w-64 transition-all"
                             />
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-emerald-400 transition-colors">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             </div>
                          </div>
+                         <button 
+                            onClick={() => setShowMobileFilters(!showMobileFilters)}
+                            className="lg:hidden p-3 rounded-2xl bg-emerald-600 text-white shadow-lg flex items-center justify-center"
+                         >
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                         </button>
                     </div>
                 </div>
             }
@@ -245,7 +253,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
 
                 <div className="flex flex-col lg:flex-row gap-10">
                     {/* Sidebar / Filter Hub */}
-                    <aside className="w-full lg:w-[320px] flex-shrink-0 space-y-8">
+                    <aside className={`w-full lg:w-[320px] flex-shrink-0 space-y-8 ${showMobileFilters ? 'block' : 'hidden lg:block'}`}>
                         {/* Categories Section */}
                         <div className="glass-panel rounded-[2rem] border border-white/5 relative overflow-hidden group">
                             <button 
@@ -481,7 +489,7 @@ export default function Index({ auth, productos, categorias, filters, availableF
                                                             </div>
                                                             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
                                                         </div>
-                                                        <h4 className="font-black text-base text-white line-clamp-2 leading-tight group-hover:text-emerald-300 transition-colors uppercase italic tracking-tight mb-6">{product.name}</h4>
+                                                        <h4 className="font-black text-base text-white leading-tight group-hover:text-emerald-300 transition-colors uppercase italic tracking-tight mb-6">{product.name}</h4>
                                                     </div>
                                                 </Link>
 

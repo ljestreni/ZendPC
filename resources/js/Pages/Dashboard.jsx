@@ -105,7 +105,7 @@ export default function Dashboard({ configuracionesGuardadas, pedidos }) {
                         onClick={() => setActiveTab('orders')}
                         className={`text-[11px] font-black uppercase tracking-[0.3em] transition-all relative ${activeTab === 'orders' ? 'text-emerald-500' : 'text-slate-500 hover:text-slate-300'}`}
                     >
-                        Manifiestos de Pedido ({pedidos.length})
+                        Mis Pedidos ({pedidos.length})
                         {activeTab === 'orders' && <motion.div layoutId="tab-underline" className="absolute -bottom-[17px] left-0 right-0 h-0.5 bg-emerald-500" />}
                     </button>
                 </div>
@@ -251,7 +251,7 @@ export default function Dashboard({ configuracionesGuardadas, pedidos }) {
                                 <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-emerald-500/30 mb-6">
                                      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                 </div>
-                                <h3 className="text-2xl font-black italic uppercase text-white mb-2 tracking-tighter">Sin Manifiestos de Pedido</h3>
+                                <h3 className="text-2xl font-black italic uppercase text-white mb-2 tracking-tighter">Sin Pedidos en el Sistema</h3>
                                 <p className="text-slate-400 mb-8 max-w-sm font-medium">Aún no has realizado ninguna adquisición en ZendPC. Visita el catálogo para empezar.</p>
                                 <Link href={route('catalog.index')} className="px-10 py-5 bg-emerald-600 text-white rounded-[2rem] font-black uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(16, 185, 129,0.4)] hover:bg-emerald-500 transition-all text-sm italic">
                                     Explorar Catálogo
@@ -286,8 +286,8 @@ export default function Dashboard({ configuracionesGuardadas, pedidos }) {
                                                 <img src={item.product?.image} alt={item.product?.name} className="w-full h-full object-contain mix-blend-multiply" />
                                             </div>
                                             <div className="flex-grow min-w-0">
-                                                <div className="text-white font-black italic uppercase tracking-tight leading-none mb-1 truncate">{item.product?.name}</div>
-                                                <div className="text-slate-500 text-[10px] font-bold">Unidades: {item.quantity}</div>
+                                                <div className="text-white font-black italic uppercase tracking-tight leading-none mb-1">{item.product?.name}</div>
+                                                <div className="text-slate-500 text-[10px] font-bold">UNIDADES: {item.quantity}</div>
                                             </div>
                                             <div className="text-right flex-shrink-0">
                                                 <div className="text-white font-black italic tracking-tighter">{Number(item.price).toLocaleString('es-ES')} €</div>
@@ -301,7 +301,7 @@ export default function Dashboard({ configuracionesGuardadas, pedidos }) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="glass-panel p-6 rounded-2xl border border-white/5">
                                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Información de Envío</div>
                                     <div className="text-sm text-slate-300 space-y-1">

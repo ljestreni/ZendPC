@@ -185,7 +185,7 @@ const CategoryPills = ({ categories }) => {
                     <div className="w-10 h-10 rounded-full bg-white/5 text-slate-400 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-all">
                         <CategoryIcon slug={cat.slug} />
                     </div>
-                    <span className="text-[10px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest mt-1 text-center truncate w-full">{cat.name}</span>
+                    <span className="text-[10px] font-black text-slate-400 group-hover:text-white uppercase tracking-widest mt-1 text-center w-full">{cat.name}</span>
                 </Link>
             ))}
         </div>
@@ -250,10 +250,10 @@ const ProductCarousel = ({ title, subtitle, products, hrefVerMas }) => {
                                 </div>
 
                                 <div className="p-5 pb-0 flex-grow">
-                                    <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2 truncate">
+                                    <div className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-2">
                                         {product.category ? product.category.name : 'Hardware'}
                                     </div>
-                                    <h4 className="font-black text-sm text-white line-clamp-2 leading-tight group-hover:text-emerald-300 transition-colors uppercase italic tracking-tight">{product.name}</h4>
+                                    <h4 className="font-black text-sm text-white leading-tight group-hover:text-emerald-300 transition-colors uppercase italic tracking-tight">{product.name}</h4>
                                 </div>
                             </Link>
 

@@ -15,13 +15,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // 1. Crear Jerarquía de Usuarios por Defecto
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Super Administrador',
+            'email' => 'superadmin@zendpc.com',
+            'password' => bcrypt('password'),
+            'role' => 'super_admin',
         ]);
 
+        User::factory()->create([
+            'name' => 'Administrador de Sistema',
+            'email' => 'admin@zendpc.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+        ]);
+
+        User::factory()->create([
+            'name' => 'Usuario de Pruebas',
+            'email' => 'user@zendpc.com',
+            'password' => bcrypt('password'),
+            'role' => 'user',
+        ]);
+
+        // 2. Cargar catálogo y configuración local
         $this->call([
             CompleteLocalSeeder::class,
         ]);

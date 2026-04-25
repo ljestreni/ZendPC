@@ -24,7 +24,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "CPU Socket ({$cpuSocket}) does not match Motherboard Socket ({$mbSocket})."
+            'reason' => "El socket del procesador ({$cpuSocket}) no coincide con el de la placa base ({$mbSocket})."
         ];
     }
 
@@ -46,7 +46,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "RAM Type ({$ramType}) is not supported by Motherboard ({$mbRamType})."
+            'reason' => "El tipo de memoria RAM ({$ramType}) no es compatible con la placa base ({$mbRamType})."
         ];
     }
 
@@ -72,7 +72,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "PSU Wattage ({$psuWattage}W) is insufficient for estimated system load ({$totalEstimated}W)."
+            'reason' => "La potencia de la fuente de alimentación ({$psuWattage}W) es insuficiente para el consumo estimado del sistema ({$totalEstimated}W)."
         ];
     }
 
@@ -94,7 +94,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "Cooler height ({$coolerHeight}mm) exceeds case clearance ({$caseMaxHeight}mm)."
+            'reason' => "La altura del disipador ({$coolerHeight}mm) supera el espacio disponible en la caja ({$caseMaxHeight}mm)."
         ];
     }
 
@@ -116,7 +116,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "Case does not support {$radSize}mm radiators (Supported: " . implode(', ', $supported) . "mm)."
+            'reason' => "La caja no soporta radiadores de {$radSize}mm (Soportados: " . implode(', ', $supported) . "mm)."
         ];
     }
 
@@ -138,7 +138,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "GPU Length ({$gpuLength}mm) exceeds Case clearance ({$caseMaxGpu}mm)."
+            'reason' => "La longitud de la tarjeta gráfica ({$gpuLength}mm) supera el espacio disponible en la caja ({$caseMaxGpu}mm)."
         ];
     }
 

@@ -7,8 +7,16 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use Inertia\Inertia;
+
 class OrderController extends Controller
 {
+    public function index()
+    {
+        $pedidos = auth()->user()->orders()->with('items.product')->latest()->get();
+        return Inertia::render('Orders/Index', compact('pedidos'));
+    }
+
     /**
      * Cancelar un pedido si está pendiente y restaurar el stock.
      */

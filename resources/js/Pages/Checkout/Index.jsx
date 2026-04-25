@@ -206,7 +206,7 @@ export default function Index({ cartItems, total }) {
                                             </div>
                                             <div className="flex-grow">
                                                 <div className="text-xs font-black text-white italic line-clamp-1 uppercase underline decoration-emerald-500/30">{item.name}</div>
-                                                <div className="text-[10px] text-slate-500 font-bold">CANTIDAD: {item.quantity}</div>
+                                                <div className="text-[10px] text-slate-500 font-bold">UNIDADES: {item.quantity}</div>
                                             </div>
                                             <div className="text-sm font-black text-white italic">
                                                 {(item.price * item.quantity).toLocaleString('es-ES')} €

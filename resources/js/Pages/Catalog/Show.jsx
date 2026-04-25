@@ -498,7 +498,7 @@ export default function Show({ auth, producto }) {
                                                         <div className="absolute inset-0 dot-grid-pattern-slate opacity-10"></div>
                                                         <div className="relative z-10">
                                                             <span className="block text-[7px] font-black text-slate-600 uppercase tracking-widest mb-1">{h.label}</span>
-                                                            <span className="text-white font-black italic uppercase tracking-tight text-sm leading-none truncate block">{h.val}</span>
+                                                            <span className="text-white font-black italic uppercase tracking-tight text-sm leading-none block">{h.val}</span>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -548,8 +548,8 @@ export default function Show({ auth, producto }) {
                                                                         <block.icon className="w-5 h-5 text-emerald-500" />
                                                                     </div>
                                                                     <div className="min-w-0">
-                                                                        <h4 className="text-white font-black uppercase text-[10px] tracking-widest mb-1 italic truncate">{block.title}</h4>
-                                                                        <p className="text-slate-500 text-[9px] leading-tight truncate">{block.desc}</p>
+                                                                        <h4 className="text-white font-black uppercase text-[10px] tracking-widest mb-1 italic">{block.title}</h4>
+                                                                        <p className="text-slate-500 text-[9px] leading-tight">{block.desc}</p>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -585,7 +585,7 @@ export default function Show({ auth, producto }) {
                                                             <div className="space-y-2">
                                                                 {Object.entries(group.content).slice(0, 4).map(([key, value]) => (
                                                                     <div key={key} className="flex justify-between items-center group/row">
-                                                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest truncate mr-2">{formatSpecKey(key)}</span>
+                                                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest mr-2">{formatSpecKey(key)}</span>
                                                                         <span className="text-[10px] font-bold text-slate-300 italic whitespace-nowrap">{formatSpecValue(key, value)}</span>
                                                                     </div>
                                                                 ))}

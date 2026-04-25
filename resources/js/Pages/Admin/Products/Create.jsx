@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export default function Create({ auth, categorias }) {
@@ -10,36 +11,80 @@ export default function Create({ auth, categorias }) {
         price: '',
         stock: '',
         image: '',
-        specs_json: '{\n  "socket": "",\n  "chipset": ""\n}',
+        image_file: null,
     });
 
-    transform((data) => {
-        let specs = null;
-        try {
-            if (data.specs_json) {
-                specs = JSON.parse(data.specs_json);
-            }
-        } catch (error) {
-            console.error("Invalid JSON format for specs");
+    const [specsList, setSpecsList] = useState([
+        { id: Math.random().toString(), key: 'socket', value: '' },
+        { id: Math.random().toString(), key: 'chipset', value: '' }
+    ]);
+
+    const addSpec = () => {
+        setSpecsList([...specsList, { id: Math.random().toString(), key: '', value: '' }]);
+    };
+
+    const removeSpec = (index) => {
+        const newList = [...specsList];
+        newList.splice(index, 1);
+        setSpecsList(newList);
+    };
+
+    const updateSpec = (index, field, val) => {
+        const newList = [...specsList];
+        newList[index][field] = val;
+        setSpecsList(newList);
+    };
+
+    const fileInputRef = useRef(null);
+    const [preview, setPreview] = useState(null);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData('image_file', file);
+            setPreview(URL.createObjectURL(file));
         }
+    };
+
+    const handleRemoveImage = () => {
+        setData('image_file', null);
+        setData('image', '');
+        setPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    // Cleanup object URL
+    useEffect(() => {
+        return () => {
+            if (preview && preview.startsWith('blob:')) {
+                URL.revokeObjectURL(preview);
+            }
+        };
+    }, [preview]);
+
+    transform((data) => {
+        const specsObj = {};
+        specsList.forEach(spec => {
+            const k = spec.key.trim();
+            if (k !== '') {
+                specsObj[k] = spec.value;
+            }
+        });
+
         return {
             ...data,
-            specs: specs,
+            specs: Object.keys(specsObj).length > 0 ? specsObj : null,
         };
     });
 
     const submit = (e) => {
         e.preventDefault();
-        try {
-            if (data.specs_json) {
-                JSON.parse(data.specs_json);
-            }
-        } catch (error) {
-            alert("El formato JSON de las especificaciones no es válido.");
-            return;
-        }
         
-        post(route('admin.products.store'));
+        post(route('admin.products.store'), {
+            forceFormData: true,
+        });
     };
 
     const inputClasses = "w-full bg-black/40 border border-white/5 text-slate-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-700 font-bold text-sm shadow-inner";
@@ -81,7 +126,6 @@ export default function Create({ auth, categorias }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Identidad */}
                             <div className="md:col-span-2 relative">
-                                <div className="absolute right-4 top-0 text-[40px] font-black text-white/[0.03] italic uppercase pointer-events-none select-none tracking-tighter">PROTOCOLO_ALTA</div>
                                 <label className={labelClasses} htmlFor="name">Designación del Producto</label>
                                 <input
                                     id="name"
@@ -103,7 +147,7 @@ export default function Create({ auth, categorias }) {
                                         id="category_id"
                                         value={data.category_id}
                                         onChange={(e) => setData('category_id', e.target.value)}
-                                        className={`${inputClasses} appearance-none cursor-pointer`}
+                                        className={`${inputClasses} appearance-none bg-none cursor-pointer pr-12`}
                                     >
                                         <option value="" className="bg-[#0f111a] text-slate-600">-- SELECCIONAR SECTOR --</option>
                                         {categorias && categorias.map((cat) => (
@@ -117,17 +161,45 @@ export default function Create({ auth, categorias }) {
                                 {errors.category_id && <div className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-1">{errors.category_id}</div>}
                             </div>
 
-                            {/* Imagen */}
                             <div>
-                                <label className={labelClasses} htmlFor="image">Matriz Visual (URL)</label>
-                                <input
-                                    id="image"
-                                    type="text"
-                                    placeholder="https://resource.host/image.png"
-                                    value={data.image}
-                                    onChange={(e) => setData('image', e.target.value)}
-                                    className={inputClasses}
-                                />
+                                <label className={labelClasses}>Matriz Visual (URL o Archivo)</label>
+                                <div className="flex items-center gap-6">
+                                    <div className="w-40 h-40 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden flex-shrink-0 bg-white p-2">
+                                        {preview ? (
+                                            <img src={preview} alt="Preview" className="w-full h-full object-contain mix-blend-multiply" />
+                                        ) : (
+                                            <span className="text-[8px] font-black uppercase text-slate-500 tracking-widest text-center">NO<br/>IMAGE</span>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleImageChange}
+                                            accept="image/*"
+                                            className="hidden"
+                                        />
+                                        <div className="flex gap-2">
+                                            <button 
+                                                type="button" 
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="flex-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 rounded-xl px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                                                Subir
+                                            </button>
+                                            <button 
+                                                type="button" 
+                                                onClick={handleRemoveImage}
+                                                className="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 rounded-xl px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {errors.image_file && <div className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-1">{errors.image_file}</div>}
                                 {errors.image && <div className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-1">{errors.image}</div>}
                             </div>
 
@@ -151,7 +223,7 @@ export default function Create({ auth, categorias }) {
 
                             {/* Stock */}
                             <div className="relative">
-                                <label className={labelClasses} htmlFor="stock">Suministro Disponible (UD)</label>
+                                <label className={labelClasses} htmlFor="stock">Suministro Disponible (UNIDADES)</label>
                                 <div className="relative group">
                                     <input
                                         id="stock"
@@ -180,19 +252,44 @@ export default function Create({ auth, categorias }) {
                                 {errors.description && <div className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-1">{errors.description}</div>}
                             </div>
 
-                            {/* Specs JSON */}
+                            {/* Especificaciones Dinámicas */}
                             <div className="md:col-span-2 relative">
-                                <div className="absolute left-5 top-14 z-20 pointer-events-none flex items-center gap-2">
-                                    <span className="px-3 py-1 bg-emerald-500 text-black text-[9px] font-black uppercase tracking-tighter rounded-md italic shadow-[0_0_15px_rgba(16,185,129,0.5)]">JSON_PROTOCOL_ALPHA</span>
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <label className={labelClasses}>Especificaciones Técnicas</label>
+                                <div className="space-y-3">
+                                    {specsList.map((spec, index) => (
+                                        <div key={spec.id} className="flex items-center gap-3">
+                                            <input
+                                                type="text"
+                                                placeholder="Ej: Socket"
+                                                value={spec.key}
+                                                onChange={(e) => updateSpec(index, 'key', e.target.value)}
+                                                className={`${inputClasses} flex-1`}
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Ej: AM5"
+                                                value={spec.value}
+                                                onChange={(e) => updateSpec(index, 'value', e.target.value)}
+                                                className={`${inputClasses} flex-[2]`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSpec(index)}
+                                                className="p-4 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-2xl border border-red-500/20 transition-colors"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={addSpec}
+                                        className="w-full py-4 border-2 border-dashed border-white/10 text-slate-400 font-bold text-[10px] uppercase tracking-widest rounded-2xl hover:bg-white/5 hover:border-emerald-500/30 hover:text-emerald-500 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
+                                        Añadir Especificación
+                                    </button>
                                 </div>
-                                <label className={labelClasses} htmlFor="specs">Fichero de Especificaciones (JSON)</label>
-                                <textarea
-                                    id="specs"
-                                    value={data.specs_json}
-                                    onChange={(e) => setData('specs_json', e.target.value)}
-                                    className="w-full bg-[#050505] border border-white/5 text-emerald-500 font-mono text-sm rounded-3xl px-8 py-10 pt-16 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/30 transition-all placeholder-slate-800 shadow-2xl relative z-10 min-h-[200px] scrollbar-hide"
-                                />
                                 {errors.specs && <div className="text-red-500 text-[10px] font-black uppercase tracking-widest mt-3 ml-1 animate-bounce">{errors.specs}</div>}
                             </div>
                         </div>

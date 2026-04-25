@@ -103,7 +103,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                                         </div>
                                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                                             <div>
-                                                <Link href={route('catalog.show', item.slug)} className="text-sm font-bold text-slate-200 leading-tight hover:text-emerald-400 line-clamp-2 transition-colors" onClick={onClose}>
+                                                <Link href={route('catalog.show', item.slug)} className="text-sm font-bold text-slate-200 leading-tight hover:text-emerald-400 transition-colors" onClick={onClose}>
                                                     {item.name}
                                                 </Link>
                                                 <div className="text-emerald-400 font-black text-sm mt-1">{item.price}€</div>

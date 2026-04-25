@@ -639,7 +639,7 @@ export default function Index({ auth, initialConfig }) {
                                             <div className="flex-grow flex flex-col min-w-0">
                                                 <div className="flex justify-between items-start mb-2">
                                                     <div className="min-w-0">
-                                                        <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-emerald-300 transition-colors truncate tracking-tight uppercase italic">{product.name}</h4>
+                                                        <h4 className="font-black text-xl text-white mb-2 leading-tight group-hover:text-emerald-300 transition-colors tracking-tight uppercase italic">{product.name}</h4>
                                                         <div className="flex flex-wrap gap-2 mb-4">
                                                             {product.specs && (() => {
                                                                 let specs = Object.entries(product.specs);
@@ -677,7 +677,7 @@ export default function Index({ auth, initialConfig }) {
                                                     </div>
                                                 </div>
                                                 
-                                                <p className="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-6 opacity-70 italic font-medium">
+                                                <p className="text-xs text-slate-400 leading-relaxed mb-6 opacity-70 italic font-medium">
                                                     {product.description || "Componente verificado de alta fidelidad, seleccionado para maximizar el potencial de tu build ZendPC."}
                                                 </p>
                                                 
@@ -826,7 +826,7 @@ export default function Index({ auth, initialConfig }) {
                                             </button>
                                         </Dropdown.Trigger>
                                         <Dropdown.Content contentClasses="py-1 bg-[#0f121d] border border-white/5 rounded-xl shadow-2xl mt-2">
-                                            {auth.user.role === 'admin' && (
+                                            {(auth.user.role === 'admin' || auth.user.role === 'super_admin') && (
                                                 <>
                                                     <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
                                                         Admin Categorías
@@ -894,7 +894,7 @@ export default function Index({ auth, initialConfig }) {
                                                         <div className="min-w-0">
                                                             <span className={`block text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 ${isActive ? 'text-emerald-400' : isSelected ? 'text-emerald-400' : 'text-slate-500'}`}>{cat.name}</span>
                                                             {isSelected ? (
-                                                                <span className="block text-[11px] font-black text-white truncate max-w-full italic tracking-tight">
+                                                                <span className="block text-[11px] font-black text-white max-w-full italic tracking-tight">
                                                                     {isSocket ? selectedPlatform : config[cat.slug].name}
                                                                 </span>
                                                             ) : (
@@ -1119,7 +1119,7 @@ export default function Index({ auth, initialConfig }) {
             </div>
 
             {/* Filter Modal */}
-            <Modal show={showMobileFilters} onClose={() => setShowMobileFilters(false)} maxWidth="md">
+            <Modal show={showMobileFilters} onClose={() => setShowMobileFilters(false)} maxWidth="md" panelClasses="rounded-[2.5rem] bg-transparent">
                 <div className="glass-card-premium border border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col max-h-[85vh]">
                     <div className="p-8 border-b border-white/10 relative z-10 shrink-0">
                         <div className="flex justify-between items-center relative z-10">

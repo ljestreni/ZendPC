@@ -15,7 +15,9 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user() || $request->user()->role !== 'admin') {
+        $user = $request->user();
+        
+        if (! $user || !in_array($user->role, ['admin', 'super_admin'])) {
             abort(403, 'Unauthorized action.');
         }
 

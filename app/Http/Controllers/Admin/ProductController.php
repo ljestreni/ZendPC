@@ -37,7 +37,12 @@ class ProductController extends Controller
         $request->merge(['slug' => Str::slug($request->name)]);
         $request->validate(self::rules());
 
-        Product::create($request->all());
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('products', 'public');
+            $request->merge(['image' => '/storage/' . $path]);
+        }
+
+        Product::create($request->except('image_file'));
 
         return redirect()->route('admin.products.index')->with('mensaje', 'Producto guardado con éxito.');
     }
@@ -70,7 +75,12 @@ class ProductController extends Controller
         }
         $request->validate(self::rules($product->id));
 
-        $product->update($request->all());
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('products', 'public');
+            $request->merge(['image' => '/storage/' . $path]);
+        }
+
+        $product->update($request->except('image_file'));
 
         return redirect()->route('admin.products.index')->with('mensaje', 'Producto modificado con éxito.');
     }
@@ -95,6 +105,7 @@ class ProductController extends Controller
             'stock' => ['required', 'integer'],
             'specs' => ['nullable', 'array'],
             'image' => ['nullable', 'string'],
+            'image_file' => ['nullable', 'image', 'max:2048'],
         ];
     }
 }
