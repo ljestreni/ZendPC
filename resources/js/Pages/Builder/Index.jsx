@@ -829,27 +829,49 @@ export default function Index({ auth, initialConfig }) {
                                                 </div>
                                             </button>
                                         </Dropdown.Trigger>
-                                        <Dropdown.Content contentClasses="py-1 bg-[#0f121d] border border-white/5 rounded-xl shadow-2xl mt-2">
+                                        <Dropdown.Content 
+                                            className="-translate-x-14 transition-all"
+                                            contentClasses="py-2 bg-[#0a0c16]/95 backdrop-blur-xl border border-white/5 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] mt-3 w-64"
+                                        >
                                             {(auth.user.role === 'admin' || auth.user.role === 'super_admin') && (
-                                                <>
-                                                    <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
-                                                        Admin Categorías
+                                                <div className="px-2 pb-2 mb-2 border-b border-white/5">
+                                                    <div className="px-3 py-2 text-[9px] font-black text-emerald-500 uppercase tracking-widest opacity-50">Administración</div>
+                                                    <Dropdown.Link href={route('admin.categories.index')} className="text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 rounded-xl flex items-center gap-3 transition-all group">
+                                                        <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>
+                                                        Categorías
                                                     </Dropdown.Link>
-                                                    <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
-                                                        Admin Productos
+                                                    <Dropdown.Link href={route('admin.products.index')} className="text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 rounded-xl flex items-center gap-3 transition-all group">
+                                                        <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                                                        Productos
                                                     </Dropdown.Link>
-                                                    <div className="border-t border-white/5 my-1"></div>
-                                                </>
+                                                    <Dropdown.Link href={route('admin.orders.index')} className="text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 rounded-xl flex items-center gap-3 transition-all group">
+                                                        <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                                                        Pedidos
+                                                    </Dropdown.Link>
+                                                    <Dropdown.Link href={route('admin.users.index')} className="text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-400 rounded-xl flex items-center gap-3 transition-all group">
+                                                        <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                                        Usuarios
+                                                    </Dropdown.Link>
+                                                </div>
                                             )}
-                                            <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
-                                                Perfil de Usuario
-                                            </Dropdown.Link>
-                                            <Dropdown.Link href={route('orders.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
-                                                Mis Pedidos
-                                            </Dropdown.Link>
-                                            <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 text-sm font-medium w-full text-left">
-                                                Cerrar Sesión
-                                            </Dropdown.Link>
+                                            
+                                            <div className="px-2 space-y-1">
+                                                <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-white/5 hover:text-white rounded-xl flex items-center gap-3 transition-all group">
+                                                    <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                                    Perfil de Usuario
+                                                </Dropdown.Link>
+                                                <Dropdown.Link href={route('orders.index')} className="text-slate-300 hover:bg-white/5 hover:text-white rounded-xl flex items-center gap-3 transition-all group">
+                                                    <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                                                    Mis Pedidos
+                                                </Dropdown.Link>
+                                            </div>
+
+                                            <div className="px-2 mt-2 pt-2 border-t border-white/5">
+                                                <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 rounded-xl flex items-center gap-3 transition-all group w-full text-left">
+                                                    <svg className="w-4 h-4 opacity-50 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                                    Cerrar Sesión
+                                                </Dropdown.Link>
+                                            </div>
                                         </Dropdown.Content>
                                     </Dropdown>
                                 ) : (

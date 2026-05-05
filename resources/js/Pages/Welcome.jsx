@@ -12,7 +12,7 @@ const BannerCarousel = () => {
             id: 1,
             title: "Configurador ZendBuilder",
             subtitle: "Ensamblaje sin cuellos de botella",
-            desc: "Accede a la inteligencia artificial de validación de hardware. Si lo permitimos, funciona.",
+            desc: "Accede al algoritmo avanzado de validación de hardware. Si lo permitimos, funciona.",
             bg: "bg-emerald-900/40",
             buttonText: "Iniciar Proyecto",
             href: route('builder.index'),
