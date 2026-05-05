@@ -103,11 +103,16 @@ class ZendBuilderController extends Controller
                     }
                 }
             } elseif ($categorySlug === 'cooler') {
-                $query->where(function($q) use ($platform) {
+                $normalized = str_replace([' ', '/', '-'], '', $platform);
+                $query->where(function($q) use ($platform, $normalized) {
                     $q->whereJsonContains('specs->socket', $platform)
+                      ->orWhereJsonContains('specs->socket', $normalized)
                       ->orWhereJsonContains('specs->socket_support', $platform)
+                      ->orWhereJsonContains('specs->socket_support', $normalized)
                       ->orWhere('specs->socket', 'like', '%' . $platform . '%')
-                      ->orWhere('specs->socket_support', 'like', '%' . $platform . '%');
+                      ->orWhere('specs->socket', 'like', '%' . $normalized . '%')
+                      ->orWhere('specs->socket_support', 'like', '%' . $platform . '%')
+                      ->orWhere('specs->socket_support', 'like', '%' . $normalized . '%');
                 });
             } elseif ($categorySlug === 'ram') {
                 // Filtramos la RAM según lo admitido por la Placa Base seleccionada o el Socket

@@ -15,8 +15,8 @@ class CompatibilityService
             return ['compatible' => true];
         }
 
-        $cpuSocket = $cpu->specs['socket'] ?? null;
-        $mbSocket = $motherboard->specs['socket'] ?? null;
+        $cpuSocket = strtolower(str_replace([' ', '/', '-'], '', $cpu->specs['socket'] ?? ''));
+        $mbSocket = strtolower(str_replace([' ', '/', '-'], '', $motherboard->specs['socket'] ?? ''));
 
         if ($cpuSocket === $mbSocket) {
             return ['compatible' => true];
@@ -24,7 +24,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "El socket del procesador ({$cpuSocket}) no coincide con el de la placa base ({$mbSocket})."
+            'reason' => "El socket del procesador ({$cpu->specs['socket']}) no coincide con el de la placa base ({$motherboard->specs['socket']})."
         ];
     }
 
@@ -37,8 +37,8 @@ class CompatibilityService
             return ['compatible' => true];
         }
 
-        $ramType = $ram->specs['type'] ?? null;
-        $mbRamType = $motherboard->specs['memory_type'] ?? null;
+        $ramType = strtolower(str_replace([' ', '-', '/'], '', $ram->specs['type'] ?? ''));
+        $mbRamType = strtolower(str_replace([' ', '-', '/'], '', $motherboard->specs['memory_type'] ?? ''));
 
         if ($ramType === $mbRamType) {
             return ['compatible' => true];
@@ -46,7 +46,7 @@ class CompatibilityService
 
         return [
             'compatible' => false,
-            'reason' => "El tipo de memoria RAM ({$ramType}) no es compatible con la placa base ({$mbRamType})."
+            'reason' => "El tipo de memoria RAM ({$ram->specs['type']}) no es compatible con la placa base ({$motherboard->specs['memory_type']})."
         ];
     }
 

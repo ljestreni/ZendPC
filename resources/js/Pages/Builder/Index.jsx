@@ -229,7 +229,7 @@ export default function Index({ auth, initialConfig }) {
         setActiveCategory('cpu');
         setShowingMobileMenu(false);
         
-        const platformParam = `?platform=${platform}`;
+        const platformParam = `?platform=${platform}&_t=${new Date().getTime()}`;
         axios.get(route('builder.products', 'cpu') + platformParam)
             .then(response => {
                 setProducts(response.data);
@@ -252,7 +252,8 @@ export default function Index({ auth, initialConfig }) {
             try {
                 const platformParam = selectedPlatform ? `?platform=${selectedPlatform}` : '';
                 const motherboardParam = config.motherboard ? (selectedPlatform ? '&' : '?') + `motherboard=${config.motherboard.id}` : '';
-                const response = await axios.get(route('builder.products', categorySlug) + platformParam + motherboardParam);
+                const cacheBuster = (platformParam || motherboardParam ? '&' : '?') + `_t=${new Date().getTime()}`;
+                const response = await axios.get(route('builder.products', categorySlug) + platformParam + motherboardParam + cacheBuster);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -808,6 +809,9 @@ export default function Index({ auth, initialConfig }) {
                                     <Link href={route('dashboard')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
                                         Mi Taller
                                     </Link>
+                                    <Link href={route('orders.index')} className="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors">
+                                        Mis Pedidos
+                                    </Link>
                                 </div>
                             </div>
                             
@@ -839,6 +843,9 @@ export default function Index({ auth, initialConfig }) {
                                             )}
                                             <Dropdown.Link href={route('profile.edit')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
                                                 Perfil de Usuario
+                                            </Dropdown.Link>
+                                            <Dropdown.Link href={route('orders.index')} className="text-slate-300 hover:bg-emerald-500/20 hover:text-emerald-400 text-sm font-medium">
+                                                Mis Pedidos
                                             </Dropdown.Link>
                                             <Dropdown.Link href={route('logout')} method="post" as="button" className="text-red-400 hover:bg-red-500/10 text-sm font-medium w-full text-left">
                                                 Cerrar Sesión
