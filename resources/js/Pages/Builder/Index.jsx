@@ -230,7 +230,7 @@ export default function Index({ auth, initialConfig }) {
         setShowingMobileMenu(false);
         
         const platformParam = `?platform=${platform}&_t=${new Date().getTime()}`;
-        axios.get(route('builder.products', 'cpu') + platformParam)
+        axios.get(`/builder/products/cpu${platformParam}`)
             .then(response => {
                 setProducts(response.data);
                 setIsLoading(false);
@@ -253,7 +253,7 @@ export default function Index({ auth, initialConfig }) {
                 const platformParam = selectedPlatform ? `?platform=${selectedPlatform}` : '';
                 const motherboardParam = config.motherboard ? (selectedPlatform ? '&' : '?') + `motherboard=${config.motherboard.id}` : '';
                 const cacheBuster = (platformParam || motherboardParam ? '&' : '?') + `_t=${new Date().getTime()}`;
-                const response = await axios.get(route('builder.products', categorySlug) + platformParam + motherboardParam + cacheBuster);
+                const response = await axios.get(`/builder/products/${categorySlug}${platformParam}${motherboardParam}${cacheBuster}`);
                 setProducts(response.data);
             } catch (error) {
                 console.error("Error fetching products:", error);
